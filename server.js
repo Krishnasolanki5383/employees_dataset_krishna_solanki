@@ -1,7 +1,7 @@
 // server.js — Main entry point: initializes Express app, connects DB, and starts the server
 
 const express = require('express');
-const { connectDB } = require('./config');
+const { connect } = require('./config');
 const { envConfig } = require('./config');
 const employeeRoutes = require('./routes');
 const { errorMiddleware, loggerMiddleware } = require('./middlewares');
@@ -28,7 +28,7 @@ app.use(errorMiddleware);
 const PORT = envConfig.PORT || 5000;
 
 const startServer = async () => {
-  await connectDB();
+  await connect();
   app.listen(PORT, () => {
     console.log(`🚀 Server running on http://localhost:${PORT}`);
   });

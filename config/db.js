@@ -1,16 +1,17 @@
 // config/db.js — Establishes and exports the MongoDB connection using Mongoose
 
+require('dotenv').config();
 const mongoose = require('mongoose');
-const { envConfig } = require('./env');
 
-const connectDB = async () => {
+const connect = async () => {
   try {
-    const conn = await mongoose.connect(envConfig.MONGO_URI);
-    console.log(`✅ MongoDB Connected: ${conn.connection.host}`);
+    const conn = await mongoose.connect(process.env.MONGODB_URI);
+    console.log(`✅ MongoDB connected successfully: ${conn.connection.host}`);
+    console.log(`✅ Database: ${conn.connection.name}`);
   } catch (error) {
-    console.error(`❌ MongoDB Connection Error: ${error.message}`);
+    console.error(`❌ MongoDB connection failed: ${error.message}`);
     process.exit(1);
   }
 };
 
-module.exports = { connectDB };
+module.exports = { connect };
