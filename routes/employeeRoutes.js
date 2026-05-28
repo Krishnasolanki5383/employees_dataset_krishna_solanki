@@ -1,38 +1,66 @@
-// routes/employeeRoutes.js — Defines all API endpoints and maps them to controller functions
+// routes/employeeRoutes.js
+// Purpose: Defines ALL API endpoints for the Employee resource.
+//          Maps HTTP methods + paths → controller functions.
+//          Applies middleware chain: authMiddleware → controller.
+//          Follows Checklist #7 (API Routing) and #10 (Middleware System).
 
 const express = require('express');
 const router = express.Router();
-const ctrl = require('../controllers/employeeController');
-const { authMiddleware } = require('../middlewares');
+const {
+  getAllEmployees,
+  getEmployeeById,
+  createEmployee,
+  replaceEmployee,
+  updateEmployee,
+  deleteEmployee,
+  checkEmployeeExists,
+  bulkCreate,
+  bulkUpdate,
+  bulkDelete,
+} = require('../controllers/employeeController');
 
-// ─── Filter Routes (must be before /:id to avoid conflicts) ───
-router.get('/exists/:id',              authMiddleware, ctrl.checkEmployeeExists);
-router.get('/name/:name',              authMiddleware, ctrl.getByName);
-router.get('/state/:state',            authMiddleware, ctrl.getByState);
-router.get('/country/:country',        authMiddleware, ctrl.getByCountry);
-router.get('/city/:city',              authMiddleware, ctrl.getByCity);
-router.get('/timezone/:timezone',      authMiddleware, ctrl.getByTimezone);
-router.get('/primary-skill/:skill',    authMiddleware, ctrl.getByPrimarySkill);
-router.get('/secondary-skill/:skill',  authMiddleware, ctrl.getBySecondarySkill);
-router.get('/domain/:domain',          authMiddleware, ctrl.getByDomain);
-router.get('/experience/:years',       authMiddleware, ctrl.getByExperience);
-router.get('/certification/:cert',     authMiddleware, ctrl.getByCertification);
-router.get('/verified',                authMiddleware, ctrl.getVerified);
-router.get('/projects',                authMiddleware, ctrl.getAllProjects);
-router.get('/tasks',                   authMiddleware, ctrl.getAllTasks);
-router.get('/top-experience',          authMiddleware, ctrl.getTopExperience);
+const { authMiddleware } = require('../middlewares/authMiddleware');
 
-// ─── Bulk Routes ──────────────────────────────────────────────
-router.post('/bulk-create',            authMiddleware, ctrl.bulkCreate);
-router.patch('/bulk-update',           authMiddleware, ctrl.bulkUpdate);
-router.delete('/bulk-delete',          authMiddleware, ctrl.bulkDelete);
+// ══════════════════════════════════════════════════════════════
+//  IMPORTANT: Specific named routes MUST come before /:id routes
+//  to prevent Express from matching "bulk-create", "exists", etc.
+//  as an :id parameter.
+// ══════════════════════════════════════════════════════════════
 
-// ─── CRUD Routes ──────────────────────────────────────────────
-router.get('/',                        authMiddleware, ctrl.getAllEmployees);
-router.get('/:id',                     authMiddleware, ctrl.getEmployeeById);
-router.post('/',                       authMiddleware, ctrl.createEmployee);
-router.put('/:id',                     authMiddleware, ctrl.replaceEmployee);
-router.patch('/:id',                   authMiddleware, ctrl.updateEmployee);
-router.delete('/:id',                  authMiddleware, ctrl.deleteEmployee);
+// ─── Filter / Named Routes (BEFORE /:id) ──────────────────────
+/**
+ * GET /employees/exists/:id
+ * Check if an employee exists (returns { exists: true/false })
+ */
+router.get('/exists/:id', authMiddleware, checkEmployeeExists);
+
+// ─── Bulk Operation Routes (BEFORE /:id) ──────────────────────
+/**
+ * POST   /employees/bulk-create   → Insert multiple employees
+ * PATCH  /employees/bulk-update   → Update multiple employees
+ * DELETE /employees/bulk-delete   → Delete multiple employees
+ */
+router.post('/bulk-create',   authMiddleware, bulkCreate);
+router.patch('/bulk-update',  authMiddleware, bulkUpdate);
+router.delete('/bulk-delete', authMiddleware, bulkDelete);
+
+// ─── Standard CRUD Routes ─────────────────────────────────────
+/**
+ * GET    /employees         → Fetch all (pagination, sort, search)
+ * POST   /employees         → Create new employee
+ */
+router.get('/',    authMiddleware, getAllEmployees);
+router.post('/',   authMiddleware, createEmployee);
+
+/**
+ * GET    /employees/:id     → Fetch single employee by ID
+ * PUT    /employees/:id     → Replace entire employee document
+ * PATCH  /employees/:id     → Update specific fields
+ * DELETE /employees/:id     → Remove employee
+ */
+router.get('/:id',    authMiddleware, getEmployeeById);
+router.put('/:id',    authMiddleware, replaceEmployee);
+router.patch('/:id',  authMiddleware, updateEmployee);
+router.delete('/:id', authMiddleware, deleteEmployee);
 
 module.exports = router;
