@@ -50,6 +50,11 @@ const {
   getAIEngineers,
   getFullStackDevelopers,
   getRecentCertifications,
+  // Route Parameter Controllers (Section 4)
+  getByProject,
+  getByTask,
+  getEmployeePerformance,
+  getEmployeeStats,
 } = require('../controllers/employeeController');
 
 // ══════════════════════════════════════════════════════════════
@@ -89,6 +94,14 @@ router.get('/secondary-skill/:skill', authMiddleware, getBySecondarySkill);
 router.get('/domain/:domain',         authMiddleware, getByDomain);
 router.get('/experience/:years',      authMiddleware, getByExperience);
 router.get('/certification/:cert',    authMiddleware, getByCertification);
+
+// Array-field lookup filters
+router.get('/project/:projectId',     authMiddleware, getByProject);
+router.get('/task/:taskId',           authMiddleware, getByTask);
+
+// Per-employee analytics (MUST be before /:id to avoid conflict)
+router.get('/performance/:id',        authMiddleware, getEmployeePerformance);
+router.get('/stats/:id',              authMiddleware, getEmployeeStats);
 
 // ══════════════════════════════════════════════════════════════
 //  BLOCK 3: BULK OPERATION ROUTES (BEFORE /:id)

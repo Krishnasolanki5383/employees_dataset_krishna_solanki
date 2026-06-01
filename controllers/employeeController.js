@@ -350,6 +350,59 @@ const getRecentCertifications = async (req, res, next) => {
 };
 
 // ══════════════════════════════════════════════════════════════
+//  SECTION 4: ROUTE PARAMETER CONTROLLERS
+//  Handles /:projectId, /:taskId, /performance/:id, /stats/:id
+// ══════════════════════════════════════════════════════════════
+
+/** GET /employees/project/:projectId */
+const getByProject = async (req, res, next) => {
+  try {
+    const result = await employeeService.getByProject(req.params.projectId);
+    if (result.count === 0)
+      return sendError(res, 404, `No employees found assigned to project '${req.params.projectId}'`);
+    return sendSuccess(res, 200, `${result.count} employee(s) found for project '${req.params.projectId}'`, result);
+  } catch (error) {
+    next(error);
+  }
+};
+
+/** GET /employees/task/:taskId */
+const getByTask = async (req, res, next) => {
+  try {
+    const result = await employeeService.getByTask(req.params.taskId);
+    if (result.count === 0)
+      return sendError(res, 404, `No employees found assigned to task '${req.params.taskId}'`);
+    return sendSuccess(res, 200, `${result.count} employee(s) found for task '${req.params.taskId}'`, result);
+  } catch (error) {
+    next(error);
+  }
+};
+
+/** GET /employees/performance/:id */
+const getEmployeePerformance = async (req, res, next) => {
+  try {
+    const result = await employeeService.getEmployeePerformance(req.params.id);
+    if (!result)
+      return sendError(res, 404, `Employee with ID '${req.params.id}' not found`);
+    return sendSuccess(res, 200, `Performance data fetched for employee '${result.name}'`, result);
+  } catch (error) {
+    next(error);
+  }
+};
+
+/** GET /employees/stats/:id */
+const getEmployeeStats = async (req, res, next) => {
+  try {
+    const result = await employeeService.getEmployeeStats(req.params.id);
+    if (!result)
+      return sendError(res, 404, `Employee with ID '${req.params.id}' not found`);
+    return sendSuccess(res, 200, `Statistics fetched for employee '${result.name}'`, result);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// ══════════════════════════════════════════════════════════════
 //  EXPORTS
 // ══════════════════════════════════════════════════════════════
 
@@ -366,25 +419,34 @@ module.exports = {
   bulkCreate,
   bulkUpdate,
   bulkDelete,
-  // Filters
+  // Filters — Location
   getByName,
   getByState,
   getByCountry,
   getByCity,
   getByTimezone,
+  // Filters — Skills & Domain
   getByPrimarySkill,
   getBySecondarySkill,
   getByDomain,
   getByExperience,
   getByCertification,
+  // Filters — Status / Arrays
   getVerifiedEmployees,
   getAllProjects,
   getAllTasks,
+  // Filters — Analytics
   getTopExperience,
   getTopSkills,
+  // Filters — Role-based
   getCloudEngineers,
   getDevOpsEngineers,
   getAIEngineers,
   getFullStackDevelopers,
   getRecentCertifications,
+  // Route Parameter Controllers (Section 4)
+  getByProject,
+  getByTask,
+  getEmployeePerformance,
+  getEmployeeStats,
 };

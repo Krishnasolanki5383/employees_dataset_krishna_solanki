@@ -5,7 +5,7 @@
 
 const express = require('express');
 const cors = require('cors');
-const { connectDB } = require('./config/db');
+const { connect } = require('./config/db');
 const { envConfig } = require('./config/env');
 const employeeRoutes = require('./routes/employeeRoutes');
 const { errorMiddleware } = require('./middlewares/errorMiddleware');
@@ -55,7 +55,7 @@ app.use(errorMiddleware);
 const PORT = envConfig.PORT || 5000;
 
 const startServer = async () => {
-  await connectDB();
+  await connect();
   app.listen(PORT, () => {
     console.log('═══════════════════════════════════════');
     console.log(`🚀  Server       : http://localhost:${PORT}`);
