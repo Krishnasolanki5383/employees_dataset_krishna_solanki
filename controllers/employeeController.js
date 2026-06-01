@@ -49,11 +49,11 @@ const getAllEmployees = async (req, res, next) => {
 
     const result = await employeeService.getAllEmployees(req.query);
 
-    if (result.total === 0) {
-      return sendSuccess(res, 200, 'No employees found', result);
-    }
+    const message = result.pagination.totalRecords === 0
+      ? 'No employees found'
+      : `${result.pagination.totalRecords} employee(s) fetched successfully`;
 
-    return sendSuccess(res, 200, `${result.total} employee(s) fetched successfully`, result);
+    return sendSuccess(res, 200, message, result.data, result.pagination);
   } catch (error) {
     next(error);
   }
@@ -181,23 +181,39 @@ const getByName = async (req, res, next) => {
   }
 };
 
-/** GET /employees/state/:state */
+/** GET /employees/state/:state  |  Query: ?page=1&limit=15 */
 const getByState = async (req, res, next) => {
   try {
-    const result = await employeeService.getByState(req.params.state);
-    if (result.count === 0) return sendError(res, 404, `No employees found in state '${req.params.state}'`);
-    return sendSuccess(res, 200, `${result.count} employee(s) found in state '${req.params.state}'`, result);
+    const page  = Number(req.query.page)  || 1;
+    const limit = Number(req.query.limit) || 10;
+    const result = await employeeService.getByState(req.params.state, { page, limit });
+    if (result.pagination.totalRecords === 0)
+      return sendError(res, 404, `No employees found in state '${req.params.state}'`);
+    return sendSuccess(
+      res, 200,
+      `${result.pagination.totalRecords} employee(s) found in state '${req.params.state}'`,
+      result.data,
+      result.pagination
+    );
   } catch (error) {
     next(error);
   }
 };
 
-/** GET /employees/country/:country */
+/** GET /employees/country/:country  |  Query: ?page=1&limit=10 */
 const getByCountry = async (req, res, next) => {
   try {
-    const result = await employeeService.getByCountry(req.params.country);
-    if (result.count === 0) return sendError(res, 404, `No employees found in country '${req.params.country}'`);
-    return sendSuccess(res, 200, `${result.count} employee(s) found in '${req.params.country}'`, result);
+    const page  = Number(req.query.page)  || 1;
+    const limit = Number(req.query.limit) || 10;
+    const result = await employeeService.getByCountry(req.params.country, { page, limit });
+    if (result.pagination.totalRecords === 0)
+      return sendError(res, 404, `No employees found in country '${req.params.country}'`);
+    return sendSuccess(
+      res, 200,
+      `${result.pagination.totalRecords} employee(s) found in '${req.params.country}'`,
+      result.data,
+      result.pagination
+    );
   } catch (error) {
     next(error);
   }
@@ -225,12 +241,20 @@ const getByTimezone = async (req, res, next) => {
   }
 };
 
-/** GET /employees/primary-skill/:skill */
+/** GET /employees/primary-skill/:skill  |  Query: ?page=1&limit=10 */
 const getByPrimarySkill = async (req, res, next) => {
   try {
-    const result = await employeeService.getByPrimarySkill(req.params.skill);
-    if (result.count === 0) return sendError(res, 404, `No employees found with primary skill '${req.params.skill}'`);
-    return sendSuccess(res, 200, `${result.count} employee(s) with primary skill '${req.params.skill}'`, result);
+    const page  = Number(req.query.page)  || 1;
+    const limit = Number(req.query.limit) || 10;
+    const result = await employeeService.getByPrimarySkill(req.params.skill, { page, limit });
+    if (result.pagination.totalRecords === 0)
+      return sendError(res, 404, `No employees found with primary skill '${req.params.skill}'`);
+    return sendSuccess(
+      res, 200,
+      `${result.pagination.totalRecords} employee(s) with primary skill '${req.params.skill}'`,
+      result.data,
+      result.pagination
+    );
   } catch (error) {
     next(error);
   }
@@ -247,12 +271,20 @@ const getBySecondarySkill = async (req, res, next) => {
   }
 };
 
-/** GET /employees/domain/:domain */
+/** GET /employees/domain/:domain  |  Query: ?page=1&limit=10 */
 const getByDomain = async (req, res, next) => {
   try {
-    const result = await employeeService.getByDomain(req.params.domain);
-    if (result.count === 0) return sendError(res, 404, `No employees found in domain '${req.params.domain}'`);
-    return sendSuccess(res, 200, `${result.count} employee(s) in domain '${req.params.domain}'`, result);
+    const page  = Number(req.query.page)  || 1;
+    const limit = Number(req.query.limit) || 10;
+    const result = await employeeService.getByDomain(req.params.domain, { page, limit });
+    if (result.pagination.totalRecords === 0)
+      return sendError(res, 404, `No employees found in domain '${req.params.domain}'`);
+    return sendSuccess(
+      res, 200,
+      `${result.pagination.totalRecords} employee(s) in domain '${req.params.domain}'`,
+      result.data,
+      result.pagination
+    );
   } catch (error) {
     next(error);
   }
@@ -283,31 +315,52 @@ const getByCertification = async (req, res, next) => {
   }
 };
 
-/** GET /employees/verified */
+/** GET /employees/verified  |  Query: ?page=1&limit=10 */
 const getVerifiedEmployees = async (req, res, next) => {
   try {
-    const result = await employeeService.getVerifiedEmployees();
-    return sendSuccess(res, 200, `${result.count} verified employee(s) found`, result);
+    const page  = Number(req.query.page)  || 1;
+    const limit = Number(req.query.limit) || 10;
+    const result = await employeeService.getVerifiedEmployees({ page, limit });
+    return sendSuccess(
+      res, 200,
+      `${result.pagination.totalRecords} verified employee(s) found`,
+      result.data,
+      result.pagination
+    );
   } catch (error) {
     next(error);
   }
 };
 
-/** GET /employees/projects */
+/** GET /employees/projects  |  Query: ?page=1&limit=20 */
 const getAllProjects = async (req, res, next) => {
   try {
-    const result = await employeeService.getAllProjects();
-    return sendSuccess(res, 200, `${result.count} project record(s) found`, result);
+    const page  = Number(req.query.page)  || 1;
+    const limit = Number(req.query.limit) || 10;
+    const result = await employeeService.getAllProjects({ page, limit });
+    return sendSuccess(
+      res, 200,
+      `${result.pagination.totalRecords} project record(s) found`,
+      result.data,
+      result.pagination
+    );
   } catch (error) {
     next(error);
   }
 };
 
-/** GET /employees/tasks */
+/** GET /employees/tasks  |  Query: ?page=1&limit=20 */
 const getAllTasks = async (req, res, next) => {
   try {
-    const result = await employeeService.getAllTasks();
-    return sendSuccess(res, 200, `${result.count} task record(s) found`, result);
+    const page  = Number(req.query.page)  || 1;
+    const limit = Number(req.query.limit) || 10;
+    const result = await employeeService.getAllTasks({ page, limit });
+    return sendSuccess(
+      res, 200,
+      `${result.pagination.totalRecords} task record(s) found`,
+      result.data,
+      result.pagination
+    );
   } catch (error) {
     next(error);
   }
@@ -374,11 +427,18 @@ const getFullStackDevelopers = async (req, res, next) => {
   }
 };
 
-/** GET /employees/recent-certifications */
+/** GET /employees/recent-certifications  |  Query: ?page=1&limit=10 */
 const getRecentCertifications = async (req, res, next) => {
   try {
-    const result = await employeeService.getRecentCertifications();
-    return sendSuccess(res, 200, `${result.count} employee(s) with certifications`, result);
+    const page  = Number(req.query.page)  || 1;
+    const limit = Number(req.query.limit) || 10;
+    const result = await employeeService.getRecentCertifications({ page, limit });
+    return sendSuccess(
+      res, 200,
+      `${result.pagination.totalRecords} employee(s) with certifications`,
+      result.data,
+      result.pagination
+    );
   } catch (error) {
     next(error);
   }

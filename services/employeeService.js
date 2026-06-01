@@ -113,11 +113,19 @@ const getAllEmployees = async (queryParams) => {
     .limit(Number(limit))
     .select('-__v');
 
+  const pageNum  = Number(page);
+  const limitNum = Number(limit);
+  const totalPages = Math.ceil(total / limitNum);
+
   return {
-    total,
-    page:       Number(page),
-    limit:      Number(limit),
-    totalPages: Math.ceil(total / Number(limit)),
+    pagination: {
+      currentPage:  pageNum,
+      totalPages,
+      totalRecords: total,
+      limit:        limitNum,
+      hasNextPage:  pageNum < totalPages,
+      hasPrevPage:  pageNum > 1,
+    },
     appliedFilters: {
       ...(country        && { country }),
       ...(state          && { state }),
@@ -260,22 +268,58 @@ const getByName = async (name) => {
 
 /**
  * GET /employees/state/:state
- * Fetch employees by state (case-insensitive).
+ * Fetch employees by state (case-insensitive). Supports pagination.
  */
-const getByState = async (state) => {
-  const filter = { state: { $regex: state, $options: 'i' } };
-  const employees = await Employee.find(filter).select('-__v').sort({ name: 1 });
-  return { count: employees.length, data: employees };
+const getByState = async (state, { page = 1, limit = 10 } = {}) => {
+  const pageNum  = Number(page);
+  const limitNum = Number(limit);
+  const skip     = (pageNum - 1) * limitNum;
+  const filter   = { state: { $regex: state, $options: 'i' } };
+
+  const total     = await Employee.countDocuments(filter);
+  const employees = await Employee.find(filter).select('-__v').sort({ name: 1 }).skip(skip).limit(limitNum);
+  const totalPages = Math.ceil(total / limitNum);
+
+  return {
+    pagination: {
+      currentPage:  pageNum,
+      totalPages,
+      totalRecords: total,
+      limit:        limitNum,
+      hasNextPage:  pageNum < totalPages,
+      hasPrevPage:  pageNum > 1,
+    },
+    count: employees.length,
+    data:  employees,
+  };
 };
 
 /**
  * GET /employees/country/:country
- * Fetch employees by country (case-insensitive).
+ * Fetch employees by country (case-insensitive). Supports pagination.
  */
-const getByCountry = async (country) => {
-  const filter = { country: { $regex: country, $options: 'i' } };
-  const employees = await Employee.find(filter).select('-__v').sort({ name: 1 });
-  return { count: employees.length, data: employees };
+const getByCountry = async (country, { page = 1, limit = 10 } = {}) => {
+  const pageNum  = Number(page);
+  const limitNum = Number(limit);
+  const skip     = (pageNum - 1) * limitNum;
+  const filter   = { country: { $regex: country, $options: 'i' } };
+
+  const total     = await Employee.countDocuments(filter);
+  const employees = await Employee.find(filter).select('-__v').sort({ name: 1 }).skip(skip).limit(limitNum);
+  const totalPages = Math.ceil(total / limitNum);
+
+  return {
+    pagination: {
+      currentPage:  pageNum,
+      totalPages,
+      totalRecords: total,
+      limit:        limitNum,
+      hasNextPage:  pageNum < totalPages,
+      hasPrevPage:  pageNum > 1,
+    },
+    count: employees.length,
+    data:  employees,
+  };
 };
 
 /**
@@ -300,12 +344,30 @@ const getByTimezone = async (timezone) => {
 
 /**
  * GET /employees/primary-skill/:skill
- * Fetch employees by primary skill (case-insensitive regex).
+ * Fetch employees by primary skill (case-insensitive regex). Supports pagination.
  */
-const getByPrimarySkill = async (skill) => {
-  const filter = { primarySkill: { $regex: skill, $options: 'i' } };
-  const employees = await Employee.find(filter).select('-__v').sort({ experience: -1 });
-  return { count: employees.length, data: employees };
+const getByPrimarySkill = async (skill, { page = 1, limit = 10 } = {}) => {
+  const pageNum  = Number(page);
+  const limitNum = Number(limit);
+  const skip     = (pageNum - 1) * limitNum;
+  const filter   = { primarySkill: { $regex: skill, $options: 'i' } };
+
+  const total     = await Employee.countDocuments(filter);
+  const employees = await Employee.find(filter).select('-__v').sort({ experience: -1 }).skip(skip).limit(limitNum);
+  const totalPages = Math.ceil(total / limitNum);
+
+  return {
+    pagination: {
+      currentPage:  pageNum,
+      totalPages,
+      totalRecords: total,
+      limit:        limitNum,
+      hasNextPage:  pageNum < totalPages,
+      hasPrevPage:  pageNum > 1,
+    },
+    count: employees.length,
+    data:  employees,
+  };
 };
 
 /**
@@ -320,12 +382,30 @@ const getBySecondarySkill = async (skill) => {
 
 /**
  * GET /employees/domain/:domain
- * Fetch employees by working domain (case-insensitive regex).
+ * Fetch employees by working domain (case-insensitive regex). Supports pagination.
  */
-const getByDomain = async (domain) => {
-  const filter = { domain: { $regex: domain, $options: 'i' } };
-  const employees = await Employee.find(filter).select('-__v').sort({ experience: -1 });
-  return { count: employees.length, data: employees };
+const getByDomain = async (domain, { page = 1, limit = 10 } = {}) => {
+  const pageNum  = Number(page);
+  const limitNum = Number(limit);
+  const skip     = (pageNum - 1) * limitNum;
+  const filter   = { domain: { $regex: domain, $options: 'i' } };
+
+  const total     = await Employee.countDocuments(filter);
+  const employees = await Employee.find(filter).select('-__v').sort({ experience: -1 }).skip(skip).limit(limitNum);
+  const totalPages = Math.ceil(total / limitNum);
+
+  return {
+    pagination: {
+      currentPage:  pageNum,
+      totalPages,
+      totalRecords: total,
+      limit:        limitNum,
+      hasNextPage:  pageNum < totalPages,
+      hasPrevPage:  pageNum > 1,
+    },
+    count: employees.length,
+    data:  employees,
+  };
 };
 
 /**
@@ -355,59 +435,132 @@ const getByCertification = async (cert) => {
 
 /**
  * GET /employees/verified
- * Fetch all employees where isVerified === true.
+ * Fetch all employees where isVerified === true. Supports pagination.
  */
-const getVerifiedEmployees = async () => {
-  const employees = await Employee.find({ isVerified: true })
-    .select('-__v')
-    .sort({ name: 1 });
-  return { count: employees.length, data: employees };
+const getVerifiedEmployees = async ({ page = 1, limit = 10 } = {}) => {
+  const pageNum  = Number(page);
+  const limitNum = Number(limit);
+  const skip     = (pageNum - 1) * limitNum;
+  const filter   = { isVerified: true };
+
+  const total     = await Employee.countDocuments(filter);
+  const employees = await Employee.find(filter).select('-__v').sort({ name: 1 }).skip(skip).limit(limitNum);
+  const totalPages = Math.ceil(total / limitNum);
+
+  return {
+    pagination: {
+      currentPage:  pageNum,
+      totalPages,
+      totalRecords: total,
+      limit:        limitNum,
+      hasNextPage:  pageNum < totalPages,
+      hasPrevPage:  pageNum > 1,
+    },
+    count: employees.length,
+    data:  employees,
+  };
 };
 
 /**
  * GET /employees/projects
- * Fetch all employee projects using Aggregation Pipeline.
- * Checklist #16: $unwind, $project, $sort stages.
+ * Fetch all employee projects using Aggregation Pipeline. Supports pagination.
+ * Checklist #16: $unwind, $project, $sort, $skip, $limit stages.
  */
-const getAllProjects = async () => {
-  const result = await Employee.aggregate([
-    { $match: { projects: { $exists: true, $not: { $size: 0 } } } },
-    { $unwind: '$projects' },
-    {
-      $project: {
-        _id: 0,
-        employeeId: '$_id',
-        employeeName: '$name',
-        email: '$email',
-        project: '$projects',
-      },
+const getAllProjects = async ({ page = 1, limit = 10 } = {}) => {
+  const pageNum  = Number(page);
+  const limitNum = Number(limit);
+  const skip     = (pageNum - 1) * limitNum;
+
+  const baseMatch = { $match: { projects: { $exists: true, $not: { $size: 0 } } } };
+  const unwindStage   = { $unwind: '$projects' };
+  const projectStage  = {
+    $project: {
+      _id: 0,
+      employeeId: '$_id',
+      employeeName: '$name',
+      email: '$email',
+      project: '$projects',
     },
-    { $sort: { employeeName: 1 } },
+  };
+  const sortStage = { $sort: { employeeName: 1 } };
+
+  // Total count (no skip/limit)
+  const countResult = await Employee.aggregate([baseMatch, unwindStage, { $count: 'total' }]);
+  const total       = countResult.length > 0 ? countResult[0].total : 0;
+  const totalPages  = Math.ceil(total / limitNum);
+
+  const result = await Employee.aggregate([
+    baseMatch,
+    unwindStage,
+    projectStage,
+    sortStage,
+    { $skip: skip },
+    { $limit: limitNum },
   ]);
-  return { count: result.length, data: result };
+
+  return {
+    pagination: {
+      currentPage:  pageNum,
+      totalPages,
+      totalRecords: total,
+      limit:        limitNum,
+      hasNextPage:  pageNum < totalPages,
+      hasPrevPage:  pageNum > 1,
+    },
+    count: result.length,
+    data:  result,
+  };
 };
 
 /**
  * GET /employees/tasks
- * Fetch all employee tasks using Aggregation Pipeline.
- * Checklist #16: $unwind, $project, $sort stages.
+ * Fetch all employee tasks using Aggregation Pipeline. Supports pagination.
+ * Checklist #16: $unwind, $project, $sort, $skip, $limit stages.
  */
-const getAllTasks = async () => {
-  const result = await Employee.aggregate([
-    { $match: { tasks: { $exists: true, $not: { $size: 0 } } } },
-    { $unwind: '$tasks' },
-    {
-      $project: {
-        _id: 0,
-        employeeId: '$_id',
-        employeeName: '$name',
-        email: '$email',
-        task: '$tasks',
-      },
+const getAllTasks = async ({ page = 1, limit = 10 } = {}) => {
+  const pageNum  = Number(page);
+  const limitNum = Number(limit);
+  const skip     = (pageNum - 1) * limitNum;
+
+  const baseMatch = { $match: { tasks: { $exists: true, $not: { $size: 0 } } } };
+  const unwindStage   = { $unwind: '$tasks' };
+  const projectStage  = {
+    $project: {
+      _id: 0,
+      employeeId: '$_id',
+      employeeName: '$name',
+      email: '$email',
+      task: '$tasks',
     },
-    { $sort: { employeeName: 1 } },
+  };
+  const sortStage = { $sort: { employeeName: 1 } };
+
+  // Total count (no skip/limit)
+  const countResult = await Employee.aggregate([baseMatch, unwindStage, { $count: 'total' }]);
+  const total       = countResult.length > 0 ? countResult[0].total : 0;
+  const totalPages  = Math.ceil(total / limitNum);
+
+  const result = await Employee.aggregate([
+    baseMatch,
+    unwindStage,
+    projectStage,
+    sortStage,
+    { $skip: skip },
+    { $limit: limitNum },
   ]);
-  return { count: result.length, data: result };
+
+  return {
+    pagination: {
+      currentPage:  pageNum,
+      totalPages,
+      totalRecords: total,
+      limit:        limitNum,
+      hasNextPage:  pageNum < totalPages,
+      hasPrevPage:  pageNum > 1,
+    },
+    count: result.length,
+    data:  result,
+  };
 };
 
 /**
@@ -526,30 +679,55 @@ const getFullStackDevelopers = async () => {
 /**
  * GET /employees/recent-certifications
  * Fetch employees who have certifications, sorted by most recently updated.
- * Uses Aggregation Pipeline: $match → $project → $sort.
- * Checklist #16: multi-stage aggregation.
+ * Uses Aggregation Pipeline: $match → $project → $sort → $skip → $limit.
+ * Checklist #16: multi-stage aggregation. Supports pagination.
  */
-const getRecentCertifications = async () => {
+const getRecentCertifications = async ({ page = 1, limit = 10 } = {}) => {
+  const pageNum  = Number(page);
+  const limitNum = Number(limit);
+  const skip     = (pageNum - 1) * limitNum;
+
+  const matchStage = {
+    $match: { certifications: { $exists: true, $not: { $size: 0 } } },
+  };
+  const projectStage = {
+    $project: {
+      name: 1,
+      email: 1,
+      primarySkill: 1,
+      domain: 1,
+      certifications: 1,
+      certificationCount: { $size: '$certifications' },
+      updatedAt: 1,
+    },
+  };
+  const sortStage = { $sort: { updatedAt: -1 } };
+
+  // Total count (no skip/limit)
+  const countResult = await Employee.aggregate([matchStage, { $count: 'total' }]);
+  const total       = countResult.length > 0 ? countResult[0].total : 0;
+  const totalPages  = Math.ceil(total / limitNum);
+
   const result = await Employee.aggregate([
-    {
-      $match: {
-        certifications: { $exists: true, $not: { $size: 0 } },
-      },
-    },
-    {
-      $project: {
-        name: 1,
-        email: 1,
-        primarySkill: 1,
-        domain: 1,
-        certifications: 1,
-        certificationCount: { $size: '$certifications' },
-        updatedAt: 1,
-      },
-    },
-    { $sort: { updatedAt: -1 } },
+    matchStage,
+    projectStage,
+    sortStage,
+    { $skip: skip },
+    { $limit: limitNum },
   ]);
-  return { count: result.length, data: result };
+
+  return {
+    pagination: {
+      currentPage:  pageNum,
+      totalPages,
+      totalRecords: total,
+      limit:        limitNum,
+      hasNextPage:  pageNum < totalPages,
+      hasPrevPage:  pageNum > 1,
+    },
+    count: result.length,
+    data:  result,
+  };
 };
 
 // ══════════════════════════════════════════════════════════════
