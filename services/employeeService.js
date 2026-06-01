@@ -466,6 +466,112 @@ const getRecentCertifications = async () => {
 };
 
 // ══════════════════════════════════════════════════════════════
+//  SECTION 4: ROUTE PARAMETER FILTERS (Checklist #7)
+//  Array-field lookups and per-employee analytics.
+// ══════════════════════════════════════════════════════════════
+
+/**
+ * GET /employees/project/:projectId
+ * Fetch employees whose projects array contains the given projectId
+ * (partial, case-insensitive regex match inside the array).
+ */
+const getByProject = async (projectId) => {
+  const filter = { projects: { $elemMatch: { $regex: projectId, $options: 'i' } } };
+  const employees = await Employee.find(filter).select('-__v').sort({ name: 1 });
+  return { count: employees.length, data: employees };
+};
+
+/**
+ * GET /employees/task/:taskId
+ * Fetch employees whose tasks array contains the given taskId
+ * (partial, case-insensitive regex match inside the array).
+ */
+const getByTask = async (taskId) => {
+  const filter = { tasks: { $elemMatch: { $regex: taskId, $options: 'i' } } };
+  const employees = await Employee.find(filter).select('-__v').sort({ name: 1 });
+  return { count: employees.length, data: employees };
+};
+
+/**
+ * GET /employees/performance/:id
+ * Fetch performance summary for a single employee by MongoDB ObjectId.
+ * Returns: totalProjects, completedTasksCount, certificationsCount, experience.
+ */
+const getEmployeePerformance = async (id) => {
+  const employee = await Employee.findById(id)
+    .select('name email primarySkill domain experience projects tasks certifications isVerified -__v')
+    .lean();
+
+  if (!employee) return null;
+
+  const totalProjects      = Array.isArray(employee.projects)      ? employee.projects.length      : 0;
+  const completedTasksCount = Array.isArray(employee.tasks)         ? employee.tasks.length         : 0;
+  const certificationsCount = Array.isArray(employee.certifications) ? employee.certifications.length : 0;
+
+  return {
+    employeeId: employee._id,
+    name: employee.name,
+    email: employee.email,
+    domain: employee.domain,
+    primarySkill: employee.primarySkill,
+    isVerified: employee.isVerified,
+    performance: {
+      totalProjects,
+      completedTasksCount,
+      certificationsCount,
+      experienceYears: employee.experience,
+    },
+    projects: employee.projects,
+    tasks: employee.tasks,
+    certifications: employee.certifications,
+  };
+};
+
+/**
+ * GET /employees/stats/:id
+ * Fetch detailed statistics for a single employee by MongoDB ObjectId.
+ * Returns: skillSummary, domainInfo, projectCount, taskCount.
+ */
+const getEmployeeStats = async (id) => {
+  const employee = await Employee.findById(id)
+    .select('name email primarySkill secondarySkill domain experience projects tasks certifications country city state timezone isVerified createdAt updatedAt -__v')
+    .lean();
+
+  if (!employee) return null;
+
+  const projectCount       = Array.isArray(employee.projects)       ? employee.projects.length       : 0;
+  const taskCount          = Array.isArray(employee.tasks)          ? employee.tasks.length          : 0;
+  const certificationCount = Array.isArray(employee.certifications) ? employee.certifications.length : 0;
+
+  return {
+    employeeId: employee._id,
+    name: employee.name,
+    email: employee.email,
+    isVerified: employee.isVerified,
+    skillSummary: {
+      primarySkill: employee.primarySkill || null,
+      secondarySkill: employee.secondarySkill || null,
+      experienceYears: employee.experience,
+      certifications: employee.certifications,
+      certificationCount,
+    },
+    domainInfo: {
+      domain: employee.domain || null,
+      country: employee.country || null,
+      city: employee.city || null,
+      state: employee.state || null,
+      timezone: employee.timezone || null,
+    },
+    projectCount,
+    taskCount,
+    projects: employee.projects,
+    tasks: employee.tasks,
+    memberSince: employee.createdAt,
+    lastUpdated: employee.updatedAt,
+  };
+};
+
+// ══════════════════════════════════════════════════════════════
 //  EXPORTS
 // ══════════════════════════════════════════════════════════════
 
@@ -482,25 +588,34 @@ module.exports = {
   bulkCreateEmployees,
   bulkUpdateEmployees,
   bulkDeleteEmployees,
-  // Filters
+  // Filters — Location
   getByName,
   getByState,
   getByCountry,
   getByCity,
   getByTimezone,
+  // Filters — Skills & Domain
   getByPrimarySkill,
   getBySecondarySkill,
   getByDomain,
   getByExperience,
   getByCertification,
+  // Filters — Status / Arrays
   getVerifiedEmployees,
   getAllProjects,
   getAllTasks,
+  // Filters — Analytics
   getTopExperience,
   getTopSkills,
+  // Filters — Role-based
   getCloudEngineers,
   getDevOpsEngineers,
   getAIEngineers,
   getFullStackDevelopers,
   getRecentCertifications,
+  // Route Parameter Routes (Section 4)
+  getByProject,
+  getByTask,
+  getEmployeePerformance,
+  getEmployeeStats,
 };

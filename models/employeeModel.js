@@ -106,7 +106,7 @@ const employeeSchema = new mongoose.Schema(
 // ─── Indexes for Performance (Checklist #15) ──────────────────
 // Compound + single field indexes on frequently filtered fields
 employeeSchema.index({ name: 1 });
-employeeSchema.index({ email: 1 }, { unique: true });
+
 employeeSchema.index({ primarySkill: 1 });
 employeeSchema.index({ secondarySkill: 1 });
 employeeSchema.index({ domain: 1 });
