@@ -13,12 +13,47 @@ const { sendSuccess, sendError } = require('../utils/responseHelper');
 
 /**
  * GET /employees
- * Query: ?page=1&limit=10&sort=createdAt&order=desc&search=nodejs
+ * Supports pagination, sorting, full-text search AND 15 query-param filters.
+ * All filters are optional and combinable in a single request.
+ *
+ * Pagination  : ?page=1&limit=10&sort=createdAt&order=desc
+ * Full-text   : ?search=nodejs
+ * Filters     : ?country=USA&primarySkill=Java&experience=5&verified=true
+ *               ?certification=AWS&skill=Node.js&project=P321&task=T832
+ *               ?technology=Kubernetes&emailVerified=true&timezone=UTC
  */
 const getAllEmployees = async (req, res, next) => {
   try {
+    const {
+      // ── Pagination & sorting ──────────────────────────────────
+      page, limit, sort, order,
+      // ── Full-text search ──────────────────────────────────────
+      search,
+      // ── 15 Query-parameter filters ────────────────────────────
+      country,
+      state,
+      city,
+      primarySkill,
+      secondarySkill,
+      domain,
+      experience,
+      verified,
+      certification,
+      timezone,
+      project,
+      task,
+      technology,
+      skill,
+      emailVerified,
+    } = req.query;
+
     const result = await employeeService.getAllEmployees(req.query);
-    return sendSuccess(res, 200, 'Employees fetched successfully', result);
+
+    if (result.total === 0) {
+      return sendSuccess(res, 200, 'No employees found', result);
+    }
+
+    return sendSuccess(res, 200, `${result.total} employee(s) fetched successfully`, result);
   } catch (error) {
     next(error);
   }

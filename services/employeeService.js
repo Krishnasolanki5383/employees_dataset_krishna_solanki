@@ -11,34 +11,103 @@ const Employee = require('../models/employeeModel');
 
 /**
  * GET /employees
- * Fetches all employees with pagination, sorting, and optional search.
- * Checklist #6: pagination, sorting, search
+ * Fetches all employees with:
+ *   - Pagination  : ?page=1&limit=10
+ *   - Sorting     : ?sort=createdAt&order=desc
+ *   - Full-text   : ?search=nodejs
+ *   - 15 query param filters (country, state, city, primarySkill,
+ *     secondarySkill, domain, experience, verified, certification,
+ *     timezone, project, task, technology, skill, emailVerified)
+ * Checklist #6: pagination, sorting, search, dynamic filtering
  */
 const getAllEmployees = async (queryParams) => {
   const {
-    page = 1,
+    // ── Pagination & sorting ──────────────────────────────────
+    page  = 1,
     limit = 10,
-    sort = 'createdAt',
+    sort  = 'createdAt',
     order = 'desc',
+    // ── Full-text search ──────────────────────────────────────
     search = '',
+    // ── 15 Query-parameter filters ────────────────────────────
+    country,
+    state,
+    city,
+    primarySkill,
+    secondarySkill,
+    domain,
+    experience,
+    verified,
+    certification,
+    timezone,
+    project,
+    task,
+    technology,
+    skill,
+    emailVerified,
   } = queryParams;
 
-  const skip = (Number(page) - 1) * Number(limit);
+  // ── Step 1: Build dynamic filter from query params ──────────
+  const filter = {};
+
+  if (country)        filter.country        = new RegExp(country, 'i');
+  if (state)          filter.state          = new RegExp(state, 'i');
+  if (city)           filter.city           = new RegExp(city, 'i');
+  if (primarySkill)   filter.primarySkill   = new RegExp(primarySkill, 'i');
+  if (secondarySkill) filter.secondarySkill = new RegExp(secondarySkill, 'i');
+  if (domain)         filter.domain         = new RegExp(domain, 'i');
+  if (timezone)       filter.timezone       = new RegExp(timezone, 'i');
+  if (technology)     filter.technologies   = new RegExp(technology, 'i');
+
+  // Numeric: experience >= N years
+  if (experience)     filter.experience     = { $gte: Number(experience) };
+
+  // Boolean flags
+  if (verified)       filter.isVerified     = verified === 'true';
+  if (emailVerified)  filter.emailVerified  = emailVerified === 'true';
+
+  // Array fields — match inside array elements
+  if (certification)  filter.certifications = { $elemMatch: { $regex: certification, $options: 'i' } };
+  if (project)        filter.projects       = { $elemMatch: { $regex: project,       $options: 'i' } };
+  if (task)           filter.tasks          = { $elemMatch: { $regex: task,          $options: 'i' } };
+
+  // skill — checks BOTH primarySkill and secondarySkill ($or)
+  if (skill) {
+    filter.$or = [
+      { primarySkill:   new RegExp(skill, 'i') },
+      { secondarySkill: new RegExp(skill, 'i') },
+    ];
+  }
+
+  // ── Step 2: Merge full-text search into the same filter ─────
+  //    Full-text search wraps its own $or; merge with $and when
+  //    both a skill $or and a search $or are present.
+  if (search) {
+    const searchOr = [
+      { name:         { $regex: search, $options: 'i' } },
+      { email:        { $regex: search, $options: 'i' } },
+      { primarySkill: { $regex: search, $options: 'i' } },
+      { domain:       { $regex: search, $options: 'i' } },
+    ];
+
+    if (filter.$or) {
+      // Both ?skill= and ?search= are present — combine with $and
+      filter.$and = [
+        { $or: filter.$or },
+        { $or: searchOr },
+      ];
+      delete filter.$or;
+    } else {
+      filter.$or = searchOr;
+    }
+  }
+
+  // ── Step 3: Pagination, sorting, query ──────────────────────
+  const skip    = (Number(page) - 1) * Number(limit);
   const sortObj = { [sort]: order === 'asc' ? 1 : -1 };
 
-  const searchFilter = search
-    ? {
-        $or: [
-          { name: { $regex: search, $options: 'i' } },
-          { email: { $regex: search, $options: 'i' } },
-          { primarySkill: { $regex: search, $options: 'i' } },
-          { domain: { $regex: search, $options: 'i' } },
-        ],
-      }
-    : {};
-
-  const total = await Employee.countDocuments(searchFilter);
-  const employees = await Employee.find(searchFilter)
+  const total     = await Employee.countDocuments(filter);
+  const employees = await Employee.find(filter)
     .sort(sortObj)
     .skip(skip)
     .limit(Number(limit))
@@ -46,9 +115,27 @@ const getAllEmployees = async (queryParams) => {
 
   return {
     total,
-    page: Number(page),
-    limit: Number(limit),
+    page:       Number(page),
+    limit:      Number(limit),
     totalPages: Math.ceil(total / Number(limit)),
+    appliedFilters: {
+      ...(country        && { country }),
+      ...(state          && { state }),
+      ...(city           && { city }),
+      ...(primarySkill   && { primarySkill }),
+      ...(secondarySkill && { secondarySkill }),
+      ...(domain         && { domain }),
+      ...(experience     && { experience: `>= ${experience}` }),
+      ...(verified       && { verified }),
+      ...(certification  && { certification }),
+      ...(timezone       && { timezone }),
+      ...(project        && { project }),
+      ...(task           && { task }),
+      ...(technology     && { technology }),
+      ...(skill          && { skill }),
+      ...(emailVerified  && { emailVerified }),
+      ...(search         && { search }),
+    },
     data: employees,
   };
 };
