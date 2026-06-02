@@ -17,6 +17,12 @@ const {
   getTopCertifications,
   getTopProjects,
   getTopTechnologies,
+  // PR 2 — Distribution Analysis
+  getSkillDistribution,
+  getDomainDistribution,
+  getExperienceAnalysis,
+  getVerificationAnalysis,
+  getTimezoneAnalysis,
 } = require('../controllers/analyticsController');
 
 // ══════════════════════════════════════════════════════════════
@@ -29,5 +35,16 @@ router.get('/employees/top-domains',        authMiddleware, getTopDomains);     
 router.get('/employees/top-certifications', authMiddleware, getTopCertifications); // Most popular certifications
 router.get('/employees/top-projects',       authMiddleware, getTopProjects);       // Project distribution
 router.get('/employees/top-technologies',   authMiddleware, getTopTechnologies);   // Technology / secondary skill usage
+
+// ══════════════════════════════════════════════════════════════
+//  BLOCK 2: DISTRIBUTION ANALYSIS  (PR 2 — 5 routes)
+//  Full breakdowns — no limit, covers entire dataset per category
+// ══════════════════════════════════════════════════════════════
+
+router.get('/employees/skill-distribution',    authMiddleware, getSkillDistribution);    // All skills grouped by count
+router.get('/employees/domain-distribution',   authMiddleware, getDomainDistribution);   // All domains grouped by count
+router.get('/employees/experience-analysis',   authMiddleware, getExperienceAnalysis);   // Junior/Mid/Senior/Expert bands
+router.get('/employees/verification-analysis', authMiddleware, getVerificationAnalysis); // Verified vs Unverified
+router.get('/employees/timezone-analysis',     authMiddleware, getTimezoneAnalysis);     // All timezones grouped by count
 
 module.exports = router;

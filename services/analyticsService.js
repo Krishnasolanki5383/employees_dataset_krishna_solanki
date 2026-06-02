@@ -162,6 +162,155 @@ const getTopTechnologies = async () => {
 };
 
 // ══════════════════════════════════════════════════════════════
+//  SECTION 2: DISTRIBUTION ANALYSIS  (PR 2 — 5 routes)
+//  Full dataset breakdowns — no $limit, returns every group
+// ══════════════════════════════════════════════════════════════
+
+/**
+ * GET /analytics/employees/skill-distribution
+ * Groups all employees by primarySkill, counts each group,
+ * returns full distribution sorted by count descending.
+ */
+const getSkillDistribution = async () => {
+  const data = await Employee.aggregate([
+    { $match: { primarySkill: { $ne: null, $ne: '' } } },
+    {
+      $group: {
+        _id: '$primarySkill',
+        count: { $sum: 1 },
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+        skill: '$_id',
+        count: 1,
+      },
+    },
+    { $sort: { count: -1 } },
+  ]);
+
+  return data;
+};
+
+/**
+ * GET /analytics/employees/domain-distribution
+ * Groups all employees by domain, counts each group,
+ * returns full distribution sorted by count descending.
+ */
+const getDomainDistribution = async () => {
+  const data = await Employee.aggregate([
+    { $match: { domain: { $ne: null, $ne: '' } } },
+    {
+      $group: {
+        _id: '$domain',
+        count: { $sum: 1 },
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+        domain: '$_id',
+        count: 1,
+      },
+    },
+    { $sort: { count: -1 } },
+  ]);
+
+  return data;
+};
+
+/**
+ * GET /analytics/employees/experience-analysis
+ * Buckets employees into experience bands using $switch:
+ *   Junior (0-2) | Mid (3-5) | Senior (6-8) | Expert (9+)
+ * Returns count per band sorted descending.
+ */
+const getExperienceAnalysis = async () => {
+  const data = await Employee.aggregate([
+    {
+      $group: {
+        _id: {
+          $switch: {
+            branches: [
+              { case: { $lte: ['$experience', 2] }, then: 'Junior (0-2)' },
+              { case: { $lte: ['$experience', 5] }, then: 'Mid (3-5)'    },
+              { case: { $lte: ['$experience', 8] }, then: 'Senior (6-8)' },
+            ],
+            default: 'Expert (9+)',
+          },
+        },
+        count: { $sum: 1 },
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+        experienceBand: '$_id',
+        count: 1,
+      },
+    },
+    { $sort: { count: -1 } },
+  ]);
+
+  return data;
+};
+
+/**
+ * GET /analytics/employees/verification-analysis
+ * Groups employees by isVerified boolean,
+ * maps true → 'Verified' and false → 'Unverified'.
+ * Returns count per status.
+ */
+const getVerificationAnalysis = async () => {
+  const data = await Employee.aggregate([
+    {
+      $group: {
+        _id: '$isVerified',
+        count: { $sum: 1 },
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+        status: { $cond: ['$_id', 'Verified', 'Unverified'] },
+        count: 1,
+      },
+    },
+    { $sort: { count: -1 } },
+  ]);
+
+  return data;
+};
+
+/**
+ * GET /analytics/employees/timezone-analysis
+ * Groups all employees by timezone, counts each group,
+ * returns full distribution sorted by count descending.
+ */
+const getTimezoneAnalysis = async () => {
+  const data = await Employee.aggregate([
+    { $match: { timezone: { $ne: null, $ne: '' } } },
+    {
+      $group: {
+        _id: '$timezone',
+        count: { $sum: 1 },
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+        timezone: '$_id',
+        count: 1,
+      },
+    },
+    { $sort: { count: -1 } },
+  ]);
+
+  return data;
+};
+
+// ══════════════════════════════════════════════════════════════
 //  EXPORTS
 // ══════════════════════════════════════════════════════════════
 
@@ -172,4 +321,10 @@ module.exports = {
   getTopCertifications,
   getTopProjects,
   getTopTechnologies,
+  // Section 2 — Distribution Analysis (PR 2)
+  getSkillDistribution,
+  getDomainDistribution,
+  getExperienceAnalysis,
+  getVerificationAnalysis,
+  getTimezoneAnalysis,
 };
