@@ -13,10 +13,24 @@ const { sendSuccess, sendError } = require('../utils/responseHelper');
 
 /**
  * GET /employees
- * Supports pagination, sorting, full-text search AND 15 query-param filters.
- * All filters are optional and combinable in a single request.
+ * Supports pagination, sorting (PR 1), full-text search AND 15 query-param filters.
+ * All params are optional and fully combinable in a single request.
  *
- * Pagination  : ?page=1&limit=10&sort=createdAt&order=desc
+ * Pagination  : ?page=1&limit=10
+ * Sorting (PR1): ?sort=<field>&order=asc|desc  (default: sort=name&order=asc)
+ *   Allowed sort fields:
+ *     ?sort=name          → Alphabetical A→Z
+ *     ?sort=experience    → By years of experience
+ *     ?sort=country       → By country
+ *     ?sort=state         → By state
+ *     ?sort=city          → By city
+ *     ?sort=domain        → By domain / project area
+ *     ?sort=timezone      → By timezone
+ *     ?sort=certifications → By certifications
+ *     ?sort=projects      → By projects
+ *     ?sort=tasks         → By tasks
+ *     ?sort=updatedAt     → By last-updated date
+ *   Direction : ?order=asc (default) | ?order=desc
  * Full-text   : ?search=nodejs
  * Filters     : ?country=USA&primarySkill=Java&experience=5&verified=true
  *               ?certification=AWS&skill=Node.js&project=P321&task=T832
@@ -498,6 +512,114 @@ const getEmployeeStats = async (req, res, next) => {
 };
 
 // ══════════════════════════════════════════════════════════════
+//  SECTION 5: DEDICATED SORT CONTROLLERS (PR 2)
+//  One controller per dedicated sort route.
+//  Controllers handle req/res ONLY — all logic is in employeeService.
+// ══════════════════════════════════════════════════════════════
+
+/** GET /employees/sort/experience-desc  |  Query: ?page=1&limit=10 */
+const sortByExperienceDesc = async (req, res, next) => {
+  try {
+    const page  = Number(req.query.page)  || 1;
+    const limit = Number(req.query.limit) || 10;
+    const result = await employeeService.getSortedByExperienceDesc({ page, limit });
+    return sendSuccess(
+      res, 200,
+      `${result.pagination.totalRecords} employee(s) sorted by experience (highest first)`,
+      result.data,
+      result.pagination
+    );
+  } catch (error) {
+    next(error);
+  }
+};
+
+/** GET /employees/sort/name-asc  |  Query: ?page=1&limit=10 */
+const sortByNameAsc = async (req, res, next) => {
+  try {
+    const page  = Number(req.query.page)  || 1;
+    const limit = Number(req.query.limit) || 10;
+    const result = await employeeService.getSortedByNameAsc({ page, limit });
+    return sendSuccess(
+      res, 200,
+      `${result.pagination.totalRecords} employee(s) sorted by name (A → Z)`,
+      result.data,
+      result.pagination
+    );
+  } catch (error) {
+    next(error);
+  }
+};
+
+/** GET /employees/sort/project-asc  |  Query: ?page=1&limit=10 */
+const sortByProjectAsc = async (req, res, next) => {
+  try {
+    const page  = Number(req.query.page)  || 1;
+    const limit = Number(req.query.limit) || 10;
+    const result = await employeeService.getSortedByProjectAsc({ page, limit });
+    return sendSuccess(
+      res, 200,
+      `${result.pagination.totalRecords} employee(s) sorted by project name (A → Z)`,
+      result.data,
+      result.pagination
+    );
+  } catch (error) {
+    next(error);
+  }
+};
+
+/** GET /employees/sort/domain-asc  |  Query: ?page=1&limit=10 */
+const sortByDomainAsc = async (req, res, next) => {
+  try {
+    const page  = Number(req.query.page)  || 1;
+    const limit = Number(req.query.limit) || 10;
+    const result = await employeeService.getSortedByDomainAsc({ page, limit });
+    return sendSuccess(
+      res, 200,
+      `${result.pagination.totalRecords} employee(s) sorted by domain (A → Z)`,
+      result.data,
+      result.pagination
+    );
+  } catch (error) {
+    next(error);
+  }
+};
+
+/** GET /employees/sort/certification-desc  |  Query: ?page=1&limit=10 */
+const sortByCertificationDesc = async (req, res, next) => {
+  try {
+    const page  = Number(req.query.page)  || 1;
+    const limit = Number(req.query.limit) || 10;
+    const result = await employeeService.getSortedByCertificationDesc({ page, limit });
+    return sendSuccess(
+      res, 200,
+      `${result.pagination.totalRecords} employee(s) sorted by certification count (most first)`,
+      result.data,
+      result.pagination
+    );
+  } catch (error) {
+    next(error);
+  }
+};
+
+/** GET /employees/sort/lastUpdated-desc  |  Query: ?page=1&limit=10 */
+const sortByLastUpdatedDesc = async (req, res, next) => {
+  try {
+    const page  = Number(req.query.page)  || 1;
+    const limit = Number(req.query.limit) || 10;
+    const result = await employeeService.getSortedByLastUpdatedDesc({ page, limit });
+    return sendSuccess(
+      res, 200,
+      `${result.pagination.totalRecords} employee(s) sorted by last updated (most recent first)`,
+      result.data,
+      result.pagination
+    );
+  } catch (error) {
+    next(error);
+  }
+};
+
+// ══════════════════════════════════════════════════════════════
 //  EXPORTS
 // ══════════════════════════════════════════════════════════════
 
@@ -544,4 +666,11 @@ module.exports = {
   getByTask,
   getEmployeePerformance,
   getEmployeeStats,
+  // PR 2 — Dedicated Sort Controllers (Section 5)
+  sortByExperienceDesc,
+  sortByNameAsc,
+  sortByProjectAsc,
+  sortByDomainAsc,
+  sortByCertificationDesc,
+  sortByLastUpdatedDesc,
 };
