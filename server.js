@@ -8,6 +8,7 @@ const cors = require('cors');
 const { connect } = require('./config/db');
 const { envConfig } = require('./config/env');
 const employeeRoutes = require('./routes/employeeRoutes');
+const searchRoutes   = require('./routes/searchRoutes');   // PR 1: Search System
 const { errorMiddleware } = require('./middlewares/errorMiddleware');
 const { loggerMiddleware } = require('./middlewares/loggerMiddleware');
 
@@ -39,6 +40,7 @@ app.get('/', (req, res) => {
 
 // ─── API Routes ───────────────────────────────────────────────
 app.use('/employees', employeeRoutes);
+app.use('/search',    searchRoutes);    // PR 1: GET /search/employees?q=keyword
 
 // ─── 404 Handler (Unknown Routes) ────────────────────────────
 app.use((req, res) => {
