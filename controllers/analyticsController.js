@@ -92,6 +92,91 @@ const getTopTechnologies = async (req, res, next) => {
 };
 
 // ══════════════════════════════════════════════════════════════
+//  SECTION 2: DISTRIBUTION ANALYSIS CONTROLLERS  (PR 2 — 5 routes)
+// ══════════════════════════════════════════════════════════════
+
+/**
+ * GET /analytics/employees/skill-distribution
+ * Returns complete skill distribution across all employees.
+ */
+const getSkillDistribution = async (req, res, next) => {
+  try {
+    const data = await analyticsService.getSkillDistribution();
+    const message = data.length === 0
+      ? 'No skill distribution data found'
+      : `Skill distribution fetched — ${data.length} unique skill(s) found`;
+    return sendSuccess(res, 200, message, data);
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * GET /analytics/employees/domain-distribution
+ * Returns complete domain distribution across all employees.
+ */
+const getDomainDistribution = async (req, res, next) => {
+  try {
+    const data = await analyticsService.getDomainDistribution();
+    const message = data.length === 0
+      ? 'No domain distribution data found'
+      : `Domain distribution fetched — ${data.length} unique domain(s) found`;
+    return sendSuccess(res, 200, message, data);
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * GET /analytics/employees/experience-analysis
+ * Returns employee count broken down by experience band
+ * (Junior / Mid / Senior / Expert).
+ */
+const getExperienceAnalysis = async (req, res, next) => {
+  try {
+    const data = await analyticsService.getExperienceAnalysis();
+    const message = data.length === 0
+      ? 'No experience data found'
+      : `Experience analysis fetched — ${data.length} band(s) returned`;
+    return sendSuccess(res, 200, message, data);
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * GET /analytics/employees/verification-analysis
+ * Returns Verified vs Unverified employee counts.
+ */
+const getVerificationAnalysis = async (req, res, next) => {
+  try {
+    const data = await analyticsService.getVerificationAnalysis();
+    const message = data.length === 0
+      ? 'No verification data found'
+      : 'Verification analysis fetched successfully';
+    return sendSuccess(res, 200, message, data);
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * GET /analytics/employees/timezone-analysis
+ * Returns complete timezone distribution across all employees.
+ */
+const getTimezoneAnalysis = async (req, res, next) => {
+  try {
+    const data = await analyticsService.getTimezoneAnalysis();
+    const message = data.length === 0
+      ? 'No timezone data found'
+      : `Timezone analysis fetched — ${data.length} unique timezone(s) found`;
+    return sendSuccess(res, 200, message, data);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// ══════════════════════════════════════════════════════════════
 //  EXPORTS
 // ══════════════════════════════════════════════════════════════
 
@@ -102,4 +187,10 @@ module.exports = {
   getTopCertifications,
   getTopProjects,
   getTopTechnologies,
+  // Section 2 — Distribution Analysis (PR 2)
+  getSkillDistribution,
+  getDomainDistribution,
+  getExperienceAnalysis,
+  getVerificationAnalysis,
+  getTimezoneAnalysis,
 };
