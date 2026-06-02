@@ -31,11 +31,13 @@ const searchEmployees = async (q, { page = 1, limit = 10 } = {}) => {
   // ── Build $or query across all searchable fields ─────────────
   // Case-insensitive regex applied to every field in parallel.
   // projects and tasks are [String] arrays — regex matches any element.
+  // PR 2: Added email field + isVerified boolean check for ?q=verified
   const keyword = new RegExp(q, 'i');
 
   const searchQuery = {
     $or: [
       { name:           keyword },
+      { email:          keyword },          // PR 2: email field added
       { primarySkill:   keyword },
       { secondarySkill: keyword },
       { domain:         keyword },
@@ -43,9 +45,13 @@ const searchEmployees = async (q, { page = 1, limit = 10 } = {}) => {
       { city:           keyword },
       { state:          keyword },
       { timezone:       keyword },
-      { certifications: keyword },   // [String] array — matches any element
-      { projects:       keyword },   // [String] array — matches any element
-      { tasks:          keyword },   // [String] array — matches any element
+      { certifications: keyword },          // [String] array — matches any element
+      { projects:       keyword },          // [String] array — matches any element
+      { tasks:          keyword },          // [String] array — matches any element
+      // PR 2: ?q=verified → also match isVerified:true employees
+      ...(q.toLowerCase().includes('verified')
+        ? [{ isVerified: true }]
+        : []),
     ],
   };
 

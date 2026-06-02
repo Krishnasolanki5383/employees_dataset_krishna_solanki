@@ -16,7 +16,7 @@ const { sendSuccess, sendError } = require('../utils/responseHelper');
  * Searches employees across all major fields.
  *
  * Query Params:
- *   q     (required) - Search keyword
+ *   q     (required) - Search keyword (min 2 characters)
  *   page  (optional) - Page number (default: 1)
  *   limit (optional) - Records per page (default: 10)
  *
@@ -25,7 +25,6 @@ const { sendSuccess, sendError } = require('../utils/responseHelper');
  *   ?q=cloud       → Cloud domain employees
  *   ?q=aws         → AWS certified employees
  *   ?q=usa         → Employees in USA
- *   ?q=verified    → Verified employees (if 'verified' appears in any field)
  */
 const searchEmployees = async (req, res, next) => {
   try {
@@ -33,14 +32,32 @@ const searchEmployees = async (req, res, next) => {
     const page  = Number(req.query.page)  || 1;
     const limit = Number(req.query.limit) || 10;
 
+    // ── PR 2: Edge Case — Empty query guard ───────────────────
+    if (!q || q.trim() === '') {
+      return sendError(res, 400, 'Search keyword is required. Use ?q=keyword');
+    }
+
+    // ── PR 2: Edge Case — Minimum length check ────────────────
+    if (q.trim().length < 2) {
+      return sendError(res, 400, 'Minimum 2 characters required for search');
+    }
+
     // ── Delegate all logic to searchService ──────────────────
-    const result = await searchService.searchEmployees(q, { page, limit });
+    const result = await searchService.searchEmployees(q.trim(), { page, limit });
 
     const message = result.totalResults === 0
       ? `No employees found for keyword '${q}'`
       : `${result.totalResults} employee(s) found for keyword '${q}'`;
 
-    return sendSuccess(res, 200, message, result.data, result.pagination);
+    // ── PR 2: Enhanced response — include searchKeyword + totalResults ──
+    return res.status(200).json({
+      success:       true,
+      message,
+      searchKeyword: result.searchKeyword,
+      totalResults:  result.totalResults,
+      pagination:    result.pagination,
+      data:          result.data,
+    });
   } catch (error) {
     next(error);
   }
