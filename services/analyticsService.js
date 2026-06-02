@@ -311,6 +311,171 @@ const getTimezoneAnalysis = async () => {
 };
 
 // ══════════════════════════════════════════════════════════════
+//  SECTION 3: ACTIVITY & LOCATION ANALYSIS  (PR 3 — 5 routes)
+//  Aggregate project/task activity stats + geographic breakdowns
+// ══════════════════════════════════════════════════════════════
+
+/**
+ * GET /analytics/employees/project-analysis
+ * Computes per-employee project totals then aggregates globally:
+ * avgProjects, maxProjects, totalProjects across the entire org.
+ * Pipeline: $project (compute size) → $group _id:null (avg/max/sum)
+ */
+const getProjectAnalysis = async () => {
+  const data = await Employee.aggregate([
+    {
+      $project: {
+        name: 1,
+        totalProjects: { $size: { $ifNull: ['$projects', []] } },
+      },
+    },
+    {
+      $group: {
+        _id: null,
+        avgProjects:   { $avg: '$totalProjects' },
+        maxProjects:   { $max: '$totalProjects' },
+        totalProjects: { $sum: '$totalProjects' },
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+        avgProjects:   { $round: ['$avgProjects', 2] },
+        maxProjects:   1,
+        totalProjects: 1,
+      },
+    },
+  ]);
+
+  return data.length > 0 ? data[0] : { avgProjects: 0, maxProjects: 0, totalProjects: 0 };
+};
+
+/**
+ * GET /analytics/employees/task-analysis
+ * Computes per-employee task totals then aggregates globally:
+ * avgTasks, maxTasks, totalTasks across the entire org.
+ * Pipeline: $project (compute size) → $group _id:null (avg/max/sum)
+ */
+const getTaskAnalysis = async () => {
+  const data = await Employee.aggregate([
+    {
+      $project: {
+        name: 1,
+        totalTasks: { $size: { $ifNull: ['$tasks', []] } },
+      },
+    },
+    {
+      $group: {
+        _id: null,
+        avgTasks:   { $avg: '$totalTasks' },
+        maxTasks:   { $max: '$totalTasks' },
+        totalTasks: { $sum: '$totalTasks' },
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+        avgTasks:   { $round: ['$avgTasks', 2] },
+        maxTasks:   1,
+        totalTasks: 1,
+      },
+    },
+  ]);
+
+  return data.length > 0 ? data[0] : { avgTasks: 0, maxTasks: 0, totalTasks: 0 };
+};
+
+/**
+ * GET /analytics/employees/location-analysis
+ * Groups employees by country + city combination
+ * to show geographic distribution at city level.
+ * Pipeline: $group { country, city } → $sort count desc
+ */
+const getLocationAnalysis = async () => {
+  const data = await Employee.aggregate([
+    {
+      $match: {
+        country: { $ne: null, $ne: '' },
+        city:    { $ne: null, $ne: '' },
+      },
+    },
+    {
+      $group: {
+        _id: { country: '$country', city: '$city' },
+        count: { $sum: 1 },
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+        country: '$_id.country',
+        city:    '$_id.city',
+        count:   1,
+      },
+    },
+    { $sort: { count: -1 } },
+  ]);
+
+  return data;
+};
+
+/**
+ * GET /analytics/employees/country-analysis
+ * Groups all employees by country, counts each group,
+ * returns full country-wise distribution sorted descending.
+ * Pipeline: $group country → $project → $sort count desc
+ */
+const getCountryAnalysis = async () => {
+  const data = await Employee.aggregate([
+    { $match: { country: { $ne: null, $ne: '' } } },
+    {
+      $group: {
+        _id: '$country',
+        count: { $sum: 1 },
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+        country: '$_id',
+        count:   1,
+      },
+    },
+    { $sort: { count: -1 } },
+  ]);
+
+  return data;
+};
+
+/**
+ * GET /analytics/employees/state-analysis
+ * Groups all employees by state, counts each group,
+ * returns full state-wise distribution sorted descending.
+ * Pipeline: $group state → $project → $sort count desc
+ */
+const getStateAnalysis = async () => {
+  const data = await Employee.aggregate([
+    { $match: { state: { $ne: null, $ne: '' } } },
+    {
+      $group: {
+        _id: '$state',
+        count: { $sum: 1 },
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+        state: '$_id',
+        count: 1,
+      },
+    },
+    { $sort: { count: -1 } },
+  ]);
+
+  return data;
+};
+
+// ══════════════════════════════════════════════════════════════
 //  EXPORTS
 // ══════════════════════════════════════════════════════════════
 
@@ -327,4 +492,10 @@ module.exports = {
   getExperienceAnalysis,
   getVerificationAnalysis,
   getTimezoneAnalysis,
+  // Section 3 — Activity & Location Analysis (PR 3)
+  getProjectAnalysis,
+  getTaskAnalysis,
+  getLocationAnalysis,
+  getCountryAnalysis,
+  getStateAnalysis,
 };

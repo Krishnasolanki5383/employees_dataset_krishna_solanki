@@ -177,6 +177,86 @@ const getTimezoneAnalysis = async (req, res, next) => {
 };
 
 // ══════════════════════════════════════════════════════════════
+//  SECTION 3: ACTIVITY & LOCATION CONTROLLERS  (PR 3 — 5 routes)
+// ══════════════════════════════════════════════════════════════
+
+/**
+ * GET /analytics/employees/project-analysis
+ * Returns org-wide project activity stats:
+ * avgProjects, maxProjects, totalProjects.
+ */
+const getProjectAnalysis = async (req, res, next) => {
+  try {
+    const data = await analyticsService.getProjectAnalysis();
+    return sendSuccess(res, 200, 'Project activity analysis fetched successfully', data);
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * GET /analytics/employees/task-analysis
+ * Returns org-wide task activity stats:
+ * avgTasks, maxTasks, totalTasks.
+ */
+const getTaskAnalysis = async (req, res, next) => {
+  try {
+    const data = await analyticsService.getTaskAnalysis();
+    return sendSuccess(res, 200, 'Task activity analysis fetched successfully', data);
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * GET /analytics/employees/location-analysis
+ * Returns employee distribution by country + city combination.
+ */
+const getLocationAnalysis = async (req, res, next) => {
+  try {
+    const data = await analyticsService.getLocationAnalysis();
+    const message = data.length === 0
+      ? 'No location data found'
+      : `Location analysis fetched — ${data.length} unique city-country pair(s) found`;
+    return sendSuccess(res, 200, message, data);
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * GET /analytics/employees/country-analysis
+ * Returns employee count grouped by country, sorted descending.
+ */
+const getCountryAnalysis = async (req, res, next) => {
+  try {
+    const data = await analyticsService.getCountryAnalysis();
+    const message = data.length === 0
+      ? 'No country data found'
+      : `Country analysis fetched — ${data.length} unique country/countries found`;
+    return sendSuccess(res, 200, message, data);
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * GET /analytics/employees/state-analysis
+ * Returns employee count grouped by state, sorted descending.
+ */
+const getStateAnalysis = async (req, res, next) => {
+  try {
+    const data = await analyticsService.getStateAnalysis();
+    const message = data.length === 0
+      ? 'No state data found'
+      : `State analysis fetched — ${data.length} unique state(s) found`;
+    return sendSuccess(res, 200, message, data);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// ══════════════════════════════════════════════════════════════
 //  EXPORTS
 // ══════════════════════════════════════════════════════════════
 
@@ -193,4 +273,10 @@ module.exports = {
   getExperienceAnalysis,
   getVerificationAnalysis,
   getTimezoneAnalysis,
+  // Section 3 — Activity & Location Analysis (PR 3)
+  getProjectAnalysis,
+  getTaskAnalysis,
+  getLocationAnalysis,
+  getCountryAnalysis,
+  getStateAnalysis,
 };
