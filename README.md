@@ -1,4 +1,4 @@
-# 👨‍💼 Employee Management System — REST API
+#  Employee Management System — REST API
 
 ![Status](https://img.shields.io/badge/Backend-Complete%20✅-brightgreen?style=for-the-badge)
 ![Node.js](https://img.shields.io/badge/Node.js-v18%2B-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)
@@ -11,7 +11,7 @@
 
 ---
 
-## 📚 Table of Contents
+## Table of Contents
 
 - [Project Overview](#-project-overview)
 - [Tech Stack](#-tech-stack)
@@ -28,7 +28,7 @@
 
 ---
 
-## 📌 Project Overview
+##  Project Overview
 
 The **Employee Management System API** provides a complete backend infrastructure for managing organizational employee data. It exposes a RESTful API with endpoints for creating, reading, updating, and deleting employee records, along with advanced querying capabilities such as filtering by skill, domain, city, state, country, and timezone.
 
@@ -41,7 +41,7 @@ The project demonstrates:
 
 ---
 
-## 🛠 Tech Stack
+##  Tech Stack
 
 | Layer            | Technology                          |
 |------------------|-------------------------------------|
@@ -56,7 +56,7 @@ The project demonstrates:
 
 ---
 
-## ✅ Prerequisites
+##  Prerequisites
 
 Before running this project, make sure you have the following installed:
 
@@ -68,7 +68,7 @@ Before running this project, make sure you have the following installed:
 
 ---
 
-## 🚀 Installation & Setup
+##  Installation & Setup
 
 ### 1. Clone the Repository
 
@@ -101,12 +101,12 @@ npm start
 
 ```
 Server running on: http://localhost:5000
-MongoDB Connected: ✅
+MongoDB Connected: 
 ```
 
 ---
 
-## 🔐 Environment Variables
+##  Environment Variables
 
 Create a `.env` file in the root directory with the following variables:
 
@@ -130,11 +130,11 @@ JWT_EXPIRES_IN=7d
 LOG_LEVEL=info
 ```
 
-> ⚠️ **Never commit your `.env` file to version control.** It is already listed in `.gitignore`.
+>  **Never commit your `.env` file to version control.** It is already listed in `.gitignore`.
 
 ---
 
-## 📁 Folder Structure
+##  Folder Structure
 
 ```
 employees_dataset_krishna_solanki/
@@ -174,13 +174,13 @@ employees_dataset_krishna_solanki/
 
 ---
 
-## 📡 API Endpoints
+##  API Endpoints
 
 Base URL: `http://localhost:5000`
 
-> 🔒 Routes marked with **[AUTH]** require a valid JWT Bearer token in the `Authorization` header.
+>  Routes marked with **[AUTH]** require a valid JWT Bearer token in the `Authorization` header.
 
-### 🔧 Basic CRUD Operations
+###  Basic CRUD Operations
 
 | Method   | Endpoint                    | Description                         | Auth     |
 |----------|-----------------------------|-------------------------------------|----------|
@@ -192,7 +192,7 @@ Base URL: `http://localhost:5000`
 | `DELETE` | `/employees/:id`            | Remove an employee record            | 🔒 [AUTH] |
 | `GET`    | `/employees/exists/:id`     | Check if an employee exists          | 🔒 [AUTH] |
 
-### 📦 Bulk Operations
+###  Bulk Operations
 
 | Method   | Endpoint                    | Description                         | Auth     |
 |----------|-----------------------------|-------------------------------------|----------|
@@ -200,7 +200,7 @@ Base URL: `http://localhost:5000`
 | `PATCH`  | `/employees/bulk-update`    | Update multiple employees at once    | 🔒 [AUTH] |
 | `DELETE` | `/employees/bulk-delete`    | Delete multiple employees at once    | 🔒 [AUTH] |
 
-### 🔍 Filter & Search Routes
+###  Filter & Search Routes
 
 | Method | Endpoint                                | Description                        | Auth     |
 |--------|-----------------------------------------|------------------------------------|----------|
@@ -221,7 +221,7 @@ Base URL: `http://localhost:5000`
 
 ---
 
-## 🔑 Authentication Guide
+##  Authentication Guide
 
 This API uses **JWT (JSON Web Token)** for stateless authentication.
 
@@ -259,13 +259,13 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 2. Select **Bearer Token**
 3. Paste your JWT token
 
-> 🕒 Tokens expire in **7 days** by default (configurable via `JWT_EXPIRES_IN` in `.env`).
+>  Tokens expire in **7 days** by default (configurable via `JWT_EXPIRES_IN` in `.env`).
 
 ---
 
-## 📝 Example Requests & Responses
+##  Example Requests & Responses
 
-### 1️⃣ Create a New Employee
+### 1️ Create a New Employee
 
 **Request:**
 ```http
@@ -316,7 +316,7 @@ Content-Type: application/json
 
 ---
 
-### 2️⃣ Fetch All Employees (with Pagination)
+### 2️ Fetch All Employees (with Pagination)
 
 **Request:**
 ```http
@@ -346,7 +346,7 @@ Authorization: Bearer <token>
 
 ---
 
-### 3️⃣ Bulk Create Employees
+### 3 Bulk Create Employees
 
 **Request:**
 ```http
@@ -375,23 +375,23 @@ Content-Type: application/json
 
 ---
 
-## ✨ Features
+##  Features
 
-- ✅ **Complete CRUD** — Create, Read, Update (PUT/PATCH), Delete operations for employees
-- ✅ **Bulk Operations** — Insert, update, and delete multiple records in a single request
-- ✅ **Advanced Filtering** — Filter by skill, domain, city, state, country, timezone, experience
-- ✅ **JWT Authentication** — Stateless, secure token-based auth with protected routes
-- ✅ **Middleware System** — Auth, request logging, global error handling, input validation
-- ✅ **MongoDB Aggregation** — Complex queries using MongoDB Aggregation Pipeline
-- ✅ **Pagination & Sorting** — `page`, `limit`, `sort`, `order` query param support
-- ✅ **MongoDB Indexing** — Performance-optimized indexes on frequently queried fields
-- ✅ **Global Error Handling** — Centralized error middleware with consistent error format
-- ✅ **RESTful Design** — Standard HTTP methods, status codes, and response structures
-- ✅ **Environment Config** — Full `.env` support via `dotenv` for all sensitive values
+-  **Complete CRUD** — Create, Read, Update (PUT/PATCH), Delete operations for employees
+-  **Bulk Operations** — Insert, update, and delete multiple records in a single request
+-  **Advanced Filtering** — Filter by skill, domain, city, state, country, timezone, experience
+-  **JWT Authentication** — Stateless, secure token-based auth with protected routes
+-  **Middleware System** — Auth, request logging, global error handling, input validation
+-  **MongoDB Aggregation** — Complex queries using MongoDB Aggregation Pipeline
+-  **Pagination & Sorting** — `page`, `limit`, `sort`, `order` query param support
+-  **MongoDB Indexing** — Performance-optimized indexes on frequently queried fields
+-  **Global Error Handling** — Centralized error middleware with consistent error format
+-  **RESTful Design** — Standard HTTP methods, status codes, and response structures
+-  **Environment Config** — Full `.env` support via `dotenv` for all sensitive values
 
 ---
 
-## 📮 Postman Collection
+##  Postman Collection
 
 A full Postman collection is available for testing all API endpoints.
 
@@ -400,7 +400,7 @@ A full Postman collection is available for testing all API endpoints.
 2. Click **Import** → **Link**
 3. Paste the collection URL *(add your shared link here)*
 
-> 💡 **Tip:** Set a Postman environment variable `{{token}}` after login and use `{{token}}` as your Bearer token across all requests automatically.
+>  **Tip:** Set a Postman environment variable `{{token}}` after login and use `{{token}}` as your Bearer token across all requests automatically.
 
 ### Environment Variables in Postman:
 
@@ -411,20 +411,20 @@ A full Postman collection is available for testing all API endpoints.
 
 ---
 
-## 👨‍💻 Author
+##  Author
 
 **Krishna Solanki**
 
-- 🐙 GitHub: [@Krishnasolanki5383](https://github.com/Krishnasolanki5383)
-- 💼 Project: Employee Management System REST API
-- 📅 Year: 2026
-- 🏗️ Architecture: MVC | Node.js | Express | MongoDB | JWT
+-  GitHub: [@Krishnasolanki5383](https://github.com/Krishnasolanki5383)
+-  Project: Employee Management System REST API
+-  Year: 2026
+-  Architecture: MVC | Node.js | Express | MongoDB | JWT
 
 ---
 
 <div align="center">
 
-**⭐ Star this repo if you find it useful!**
+** Star this repo if you find it useful!**
 
 ![Backend Complete](https://img.shields.io/badge/Backend-Complete%20✅-brightgreen?style=for-the-badge)
 
