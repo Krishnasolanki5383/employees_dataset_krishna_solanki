@@ -1,6 +1,6 @@
 #  Employee Management System — REST API
 
-![Status](https://img.shields.io/badge/Backend-Complete%20✅-brightgreen?style=for-the-badge)
+![Status](https://img.shields.io/badge/Backend-Complete%20-brightgreen?style=for-the-badge)
 ![Node.js](https://img.shields.io/badge/Node.js-v18%2B-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)
 ![Express.js](https://img.shields.io/badge/Express.js-4.x-000000?style=for-the-badge&logo=express&logoColor=white)
 ![MongoDB](https://img.shields.io/badge/MongoDB-7.x-47A248?style=for-the-badge&logo=mongodb&logoColor=white)
@@ -184,40 +184,40 @@ Base URL: `http://localhost:5000`
 
 | Method   | Endpoint                    | Description                         | Auth     |
 |----------|-----------------------------|-------------------------------------|----------|
-| `GET`    | `/employees`                | Fetch all employee records           | 🔒 [AUTH] |
-| `GET`    | `/employees/:id`            | Fetch single employee by ID          | 🔒 [AUTH] |
-| `POST`   | `/employees`                | Add a new employee record            | 🔒 [AUTH] |
-| `PUT`    | `/employees/:id`            | Replace complete employee record     | 🔒 [AUTH] |
-| `PATCH`  | `/employees/:id`            | Update specific employee fields      | 🔒 [AUTH] |
-| `DELETE` | `/employees/:id`            | Remove an employee record            | 🔒 [AUTH] |
-| `GET`    | `/employees/exists/:id`     | Check if an employee exists          | 🔒 [AUTH] |
+| `GET`    | `/employees`                | Fetch all employee records           |  [AUTH] |
+| `GET`    | `/employees/:id`            | Fetch single employee by ID          |  [AUTH] |
+| `POST`   | `/employees`                | Add a new employee record            |  [AUTH] |
+| `PUT`    | `/employees/:id`            | Replace complete employee record     |  [AUTH] |
+| `PATCH`  | `/employees/:id`            | Update specific employee fields      |  [AUTH] |
+| `DELETE` | `/employees/:id`            | Remove an employee record            |  [AUTH] |
+| `GET`    | `/employees/exists/:id`     | Check if an employee exists          |  [AUTH] |
 
 ###  Bulk Operations
 
 | Method   | Endpoint                    | Description                         | Auth     |
 |----------|-----------------------------|-------------------------------------|----------|
-| `POST`   | `/employees/bulk-create`    | Insert multiple employee records     | 🔒 [AUTH] |
-| `PATCH`  | `/employees/bulk-update`    | Update multiple employees at once    | 🔒 [AUTH] |
-| `DELETE` | `/employees/bulk-delete`    | Delete multiple employees at once    | 🔒 [AUTH] |
+| `POST`   | `/employees/bulk-create`    | Insert multiple employee records     |  [AUTH] |
+| `PATCH`  | `/employees/bulk-update`    | Update multiple employees at once    |  [AUTH] |
+| `DELETE` | `/employees/bulk-delete`    | Delete multiple employees at once    |  [AUTH] |
 
 ###  Filter & Search Routes
 
 | Method | Endpoint                                | Description                        | Auth     |
 |--------|-----------------------------------------|------------------------------------|----------|
-| `GET`  | `/employees/name/:name`                 | Fetch employees by name            | 🔒 [AUTH] |
-| `GET`  | `/employees/state/:state`               | Fetch employees by state           | 🔒 [AUTH] |
-| `GET`  | `/employees/country/:country`           | Fetch employees by country         | 🔒 [AUTH] |
-| `GET`  | `/employees/city/:city`                 | Fetch employees by city            | 🔒 [AUTH] |
-| `GET`  | `/employees/timezone/:timezone`         | Fetch employees by timezone        | 🔒 [AUTH] |
-| `GET`  | `/employees/primary-skill/:skill`       | Fetch by primary skill             | 🔒 [AUTH] |
-| `GET`  | `/employees/secondary-skill/:skill`     | Fetch by secondary skill           | 🔒 [AUTH] |
-| `GET`  | `/employees/domain/:domain`             | Fetch employees by domain          | 🔒 [AUTH] |
-| `GET`  | `/employees/experience/:years`          | Fetch by years of experience       | 🔒 [AUTH] |
-| `GET`  | `/employees/certification/:cert`        | Fetch by certification             | 🔒 [AUTH] |
-| `GET`  | `/employees/verified`                   | Fetch all verified employees       | 🔒 [AUTH] |
-| `GET`  | `/employees/projects`                   | Fetch all employee projects        | 🔒 [AUTH] |
-| `GET`  | `/employees/tasks`                      | Fetch all employee tasks           | 🔒 [AUTH] |
-| `GET`  | `/employees/top-experience`             | Fetch most experienced employees   | 🔒 [AUTH] |
+| `GET`  | `/employees/name/:name`                 | Fetch employees by name            |  [AUTH] |
+| `GET`  | `/employees/state/:state`               | Fetch employees by state           |  [AUTH] |
+| `GET`  | `/employees/country/:country`           | Fetch employees by country         |  [AUTH] |
+| `GET`  | `/employees/city/:city`                 | Fetch employees by city            |  [AUTH] |
+| `GET`  | `/employees/timezone/:timezone`         | Fetch employees by timezone        |  [AUTH] |
+| `GET`  | `/employees/primary-skill/:skill`       | Fetch by primary skill             |  [AUTH] |
+| `GET`  | `/employees/secondary-skill/:skill`     | Fetch by secondary skill           |  [AUTH] |
+| `GET`  | `/employees/domain/:domain`             | Fetch employees by domain          |  [AUTH] |
+| `GET`  | `/employees/experience/:years`          | Fetch by years of experience       |  [AUTH] |
+| `GET`  | `/employees/certification/:cert`        | Fetch by certification             |  [AUTH] |
+| `GET`  | `/employees/verified`                   | Fetch all verified employees       |  [AUTH] |
+| `GET`  | `/employees/projects`                   | Fetch all employee projects        |  [AUTH] |
+| `GET`  | `/employees/tasks`                      | Fetch all employee tasks           |  [AUTH] |
+| `GET`  | `/employees/top-experience`             | Fetch most experienced employees   |  [AUTH] |
 
 ---
 
