@@ -5,6 +5,23 @@
 
 const Employee = require('../models/employeeModel');
 
+// ── PR 1: Whitelist of fields allowed for ?sort= query parameter ──────────────
+// Prevents arbitrary field injection. Any value outside this list falls
+// back to the default ('name' ascending).
+const VALID_SORT_FIELDS = [
+  'name',          // Sort alphabetically by employee name
+  'experience',    // Sort by years of experience
+  'country',       // Sort by country
+  'state',         // Sort by state
+  'city',          // Sort by city
+  'domain',        // Sort by domain (used as 'project domain' proxy)
+  'timezone',      // Sort by timezone
+  'certifications',// Sort by certifications array (lexicographic)
+  'projects',      // Sort by projects array (lexicographic)
+  'tasks',         // Sort by tasks array (lexicographic)
+  'updatedAt',     // Sort by last-updated timestamp
+];
+
 // ══════════════════════════════════════════════════════════════
 //  SECTION 1: BASIC CRUD OPERATIONS
 // ══════════════════════════════════════════════════════════════
@@ -25,8 +42,8 @@ const getAllEmployees = async (queryParams) => {
     // ── Pagination & sorting ──────────────────────────────────
     page  = 1,
     limit = 10,
-    sort  = 'createdAt',
-    order = 'desc',
+    sort  = 'name',   // PR 1: default sort field changed to 'name' (asc)
+    order = 'asc',    // PR 1: default order changed to 'asc' to match name-sort UX
     // ── Full-text search ──────────────────────────────────────
     search = '',
     // ── 15 Query-parameter filters ────────────────────────────
@@ -103,18 +120,26 @@ const getAllEmployees = async (queryParams) => {
   }
 
   // ── Step 3: Pagination, sorting, query ──────────────────────
-  const skip    = (Number(page) - 1) * Number(limit);
-  const sortObj = { [sort]: order === 'asc' ? 1 : -1 };
+  //
+  // PR 1 — Dynamic sort with whitelist validation:
+  //   • Only fields in VALID_SORT_FIELDS are accepted.
+  //   • Unknown/missing sort param falls back to { name: 1 }.
+  //   • ?order=desc  → -1  |  anything else (incl. 'asc') → 1
+  const skip = (Number(page) - 1) * Number(limit);
+
+  const resolvedSort  = VALID_SORT_FIELDS.includes(sort) ? sort : 'name';
+  const resolvedOrder = order === 'desc' ? -1 : 1;
+  const sortObject    = { [resolvedSort]: resolvedOrder };
 
   const total     = await Employee.countDocuments(filter);
   const employees = await Employee.find(filter)
-    .sort(sortObj)
+    .sort(sortObject)
     .skip(skip)
     .limit(Number(limit))
     .select('-__v');
 
-  const pageNum  = Number(page);
-  const limitNum = Number(limit);
+  const pageNum    = Number(page);
+  const limitNum   = Number(limit);
   const totalPages = Math.ceil(total / limitNum);
 
   return {
@@ -125,6 +150,11 @@ const getAllEmployees = async (queryParams) => {
       limit:        limitNum,
       hasNextPage:  pageNum < totalPages,
       hasPrevPage:  pageNum > 1,
+    },
+    // PR 1 — Show which sort was actually applied (useful for debugging)
+    appliedSort: {
+      field:     resolvedSort,
+      direction: resolvedOrder === 1 ? 'asc' : 'desc',
     },
     appliedFilters: {
       ...(country        && { country }),
@@ -837,6 +867,196 @@ const getEmployeeStats = async (id) => {
 };
 
 // ══════════════════════════════════════════════════════════════
+//  SECTION 5: DEDICATED SORT ROUTES (PR 2)
+//  Each function has a HARDCODED sort object.
+//  All support ?page=1&limit=10 pagination.
+// ══════════════════════════════════════════════════════════════
+
+/**
+ * GET /employees/sort/experience-desc
+ * Returns all employees sorted by experience descending (highest first).
+ * Supports pagination: ?page=1&limit=10
+ */
+const getSortedByExperienceDesc = async ({ page = 1, limit = 10 } = {}) => {
+  const pageNum  = Number(page);
+  const limitNum = Number(limit);
+  const skip     = (pageNum - 1) * limitNum;
+
+  const total     = await Employee.countDocuments();
+  const employees = await Employee.find()
+    .sort({ experience: -1 })          // hardcoded: highest experience first
+    .skip(skip)
+    .limit(limitNum)
+    .select('-__v');
+
+  const totalPages = Math.ceil(total / limitNum);
+  return {
+    pagination: {
+      currentPage: pageNum, totalPages, totalRecords: total,
+      limit: limitNum, hasNextPage: pageNum < totalPages, hasPrevPage: pageNum > 1,
+    },
+    appliedSort: { field: 'experience', direction: 'desc' },
+    data: employees,
+  };
+};
+
+/**
+ * GET /employees/sort/name-asc
+ * Returns all employees sorted alphabetically by name ascending.
+ * Supports pagination: ?page=1&limit=10
+ */
+const getSortedByNameAsc = async ({ page = 1, limit = 10 } = {}) => {
+  const pageNum  = Number(page);
+  const limitNum = Number(limit);
+  const skip     = (pageNum - 1) * limitNum;
+
+  const total     = await Employee.countDocuments();
+  const employees = await Employee.find()
+    .sort({ name: 1 })                 // hardcoded: A → Z
+    .skip(skip)
+    .limit(limitNum)
+    .select('-__v');
+
+  const totalPages = Math.ceil(total / limitNum);
+  return {
+    pagination: {
+      currentPage: pageNum, totalPages, totalRecords: total,
+      limit: limitNum, hasNextPage: pageNum < totalPages, hasPrevPage: pageNum > 1,
+    },
+    appliedSort: { field: 'name', direction: 'asc' },
+    data: employees,
+  };
+};
+
+/**
+ * GET /employees/sort/project-asc
+ * Returns all employees who have projects, sorted by first project name ascending.
+ * Supports pagination: ?page=1&limit=10
+ */
+const getSortedByProjectAsc = async ({ page = 1, limit = 10 } = {}) => {
+  const pageNum  = Number(page);
+  const limitNum = Number(limit);
+  const skip     = (pageNum - 1) * limitNum;
+
+  const filter = { projects: { $exists: true, $not: { $size: 0 } } };
+
+  const total     = await Employee.countDocuments(filter);
+  const employees = await Employee.find(filter)
+    .sort({ 'projects': 1 })           // hardcoded: projects array lexicographic asc
+    .skip(skip)
+    .limit(limitNum)
+    .select('-__v');
+
+  const totalPages = Math.ceil(total / limitNum);
+  return {
+    pagination: {
+      currentPage: pageNum, totalPages, totalRecords: total,
+      limit: limitNum, hasNextPage: pageNum < totalPages, hasPrevPage: pageNum > 1,
+    },
+    appliedSort: { field: 'projects', direction: 'asc' },
+    data: employees,
+  };
+};
+
+/**
+ * GET /employees/sort/domain-asc
+ * Returns all employees sorted by domain name ascending (A → Z).
+ * Supports pagination: ?page=1&limit=10
+ */
+const getSortedByDomainAsc = async ({ page = 1, limit = 10 } = {}) => {
+  const pageNum  = Number(page);
+  const limitNum = Number(limit);
+  const skip     = (pageNum - 1) * limitNum;
+
+  const total     = await Employee.countDocuments();
+  const employees = await Employee.find()
+    .sort({ domain: 1 })               // hardcoded: domain A → Z
+    .skip(skip)
+    .limit(limitNum)
+    .select('-__v');
+
+  const totalPages = Math.ceil(total / limitNum);
+  return {
+    pagination: {
+      currentPage: pageNum, totalPages, totalRecords: total,
+      limit: limitNum, hasNextPage: pageNum < totalPages, hasPrevPage: pageNum > 1,
+    },
+    appliedSort: { field: 'domain', direction: 'asc' },
+    data: employees,
+  };
+};
+
+/**
+ * GET /employees/sort/certification-desc
+ * Returns employees sorted by number of certifications descending (most certs first).
+ * Uses Aggregation Pipeline to compute certificationCount.
+ * Supports pagination: ?page=1&limit=10
+ */
+const getSortedByCertificationDesc = async ({ page = 1, limit = 10 } = {}) => {
+  const pageNum  = Number(page);
+  const limitNum = Number(limit);
+  const skip     = (pageNum - 1) * limitNum;
+
+  const matchStage = { $match: { certifications: { $exists: true } } };
+  const addFieldsStage = {
+    $addFields: { certificationCount: { $size: { $ifNull: ['$certifications', []] } } },
+  };
+  const sortStage    = { $sort: { certificationCount: -1, name: 1 } }; // hardcoded: most certs first
+  const projectStage = { $project: { __v: 0 } };
+
+  // Count total
+  const countResult = await Employee.aggregate([matchStage, { $count: 'total' }]);
+  const total       = countResult.length > 0 ? countResult[0].total : 0;
+  const totalPages  = Math.ceil(total / limitNum);
+
+  const employees = await Employee.aggregate([
+    matchStage,
+    addFieldsStage,
+    sortStage,
+    projectStage,
+    { $skip: skip },
+    { $limit: limitNum },
+  ]);
+
+  return {
+    pagination: {
+      currentPage: pageNum, totalPages, totalRecords: total,
+      limit: limitNum, hasNextPage: pageNum < totalPages, hasPrevPage: pageNum > 1,
+    },
+    appliedSort: { field: 'certificationCount', direction: 'desc' },
+    data: employees,
+  };
+};
+
+/**
+ * GET /employees/sort/lastUpdated-desc
+ * Returns all employees sorted by updatedAt descending (most recently updated first).
+ * Supports pagination: ?page=1&limit=10
+ */
+const getSortedByLastUpdatedDesc = async ({ page = 1, limit = 10 } = {}) => {
+  const pageNum  = Number(page);
+  const limitNum = Number(limit);
+  const skip     = (pageNum - 1) * limitNum;
+
+  const total     = await Employee.countDocuments();
+  const employees = await Employee.find()
+    .sort({ updatedAt: -1 })           // hardcoded: most recently updated first
+    .skip(skip)
+    .limit(limitNum)
+    .select('-__v');
+
+  const totalPages = Math.ceil(total / limitNum);
+  return {
+    pagination: {
+      currentPage: pageNum, totalPages, totalRecords: total,
+      limit: limitNum, hasNextPage: pageNum < totalPages, hasPrevPage: pageNum > 1,
+    },
+    appliedSort: { field: 'updatedAt', direction: 'desc' },
+    data: employees,
+  };
+};
+
+// ══════════════════════════════════════════════════════════════
 //  EXPORTS
 // ══════════════════════════════════════════════════════════════
 
@@ -883,4 +1103,11 @@ module.exports = {
   getByTask,
   getEmployeePerformance,
   getEmployeeStats,
+  // PR 2 — Dedicated Sort Routes (Section 5)
+  getSortedByExperienceDesc,
+  getSortedByNameAsc,
+  getSortedByProjectAsc,
+  getSortedByDomainAsc,
+  getSortedByCertificationDesc,
+  getSortedByLastUpdatedDesc,
 };

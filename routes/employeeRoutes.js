@@ -55,6 +55,13 @@ const {
   getByTask,
   getEmployeePerformance,
   getEmployeeStats,
+  // PR 2 — Dedicated Sort Controllers (Section 5)
+  sortByExperienceDesc,
+  sortByNameAsc,
+  sortByProjectAsc,
+  sortByDomainAsc,
+  sortByCertificationDesc,
+  sortByLastUpdatedDesc,
 } = require('../controllers/employeeController');
 
 // ══════════════════════════════════════════════════════════════
@@ -72,6 +79,14 @@ router.get('/devops-engineers',       authMiddleware, getDevOpsEngineers);
 router.get('/ai-engineers',           authMiddleware, getAIEngineers);
 router.get('/fullstack',              authMiddleware, getFullStackDevelopers);
 router.get('/recent-certifications',  authMiddleware, getRecentCertifications);
+
+// ── PR 2: Dedicated Sort Routes (?page=1&limit=10 supported on all) ──
+router.get('/sort/experience-desc',   authMiddleware, sortByExperienceDesc);    // Highest experience first
+router.get('/sort/name-asc',          authMiddleware, sortByNameAsc);           // Alphabetical A→Z
+router.get('/sort/project-asc',       authMiddleware, sortByProjectAsc);        // Projects alphabetically
+router.get('/sort/domain-asc',        authMiddleware, sortByDomainAsc);         // Domains alphabetically
+router.get('/sort/certification-desc',authMiddleware, sortByCertificationDesc); // Most certifications first
+router.get('/sort/lastUpdated-desc',  authMiddleware, sortByLastUpdatedDesc);   // Recently updated first
 
 // ══════════════════════════════════════════════════════════════
 //  BLOCK 2: STATIC PARAM ROUTES (with :param — named segments)
@@ -116,6 +131,8 @@ router.delete('/bulk-delete',         authMiddleware, bulkDelete);
 //  General collection routes first, then /:id dynamic routes last
 // ══════════════════════════════════════════════════════════════
 
+// PR 1 — GET /employees supports ?sort=name|experience|country|state|city|domain|timezone|certifications|projects|tasks|updatedAt
+//          and ?order=asc|desc  (default: sort=name, order=asc)
 router.get('/',     authMiddleware, getAllEmployees);   // GET    /employees
 router.post('/',    authMiddleware, createEmployee);    // POST   /employees
 
