@@ -1,6 +1,6 @@
 // config/db.js — Establishes and exports the MongoDB connection using Mongoose
 
-require('dotenv').config();
+require('dotenv').config({ path: require('path').resolve(__dirname, '../.env') });
 const mongoose = require('mongoose');
 
 const connect = async () => {

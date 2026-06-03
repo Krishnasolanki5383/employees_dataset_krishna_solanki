@@ -23,12 +23,6 @@ const {
   getExperienceAnalysis,
   getVerificationAnalysis,
   getTimezoneAnalysis,
-  // PR 3 — Activity & Location Analysis
-  getProjectAnalysis,
-  getTaskAnalysis,
-  getLocationAnalysis,
-  getCountryAnalysis,
-  getStateAnalysis,
 } = require('../controllers/analyticsController');
 
 // ══════════════════════════════════════════════════════════════
@@ -52,16 +46,5 @@ router.get('/employees/domain-distribution',   authMiddleware, getDomainDistribu
 router.get('/employees/experience-analysis',   authMiddleware, getExperienceAnalysis);   // Junior/Mid/Senior/Expert bands
 router.get('/employees/verification-analysis', authMiddleware, getVerificationAnalysis); // Verified vs Unverified
 router.get('/employees/timezone-analysis',     authMiddleware, getTimezoneAnalysis);     // All timezones grouped by count
-
-// ══════════════════════════════════════════════════════════════
-//  BLOCK 3: ACTIVITY & LOCATION ANALYSIS  (PR 3 — 5 routes)
-//  Project/task org-wide stats + geographic breakdowns
-// ══════════════════════════════════════════════════════════════
-
-router.get('/employees/project-analysis',  authMiddleware, getProjectAnalysis);  // avgProjects / maxProjects / totalProjects
-router.get('/employees/task-analysis',     authMiddleware, getTaskAnalysis);     // avgTasks / maxTasks / totalTasks
-router.get('/employees/location-analysis', authMiddleware, getLocationAnalysis); // Country + city distribution
-router.get('/employees/country-analysis',  authMiddleware, getCountryAnalysis);  // Country-wise employee count
-router.get('/employees/state-analysis',    authMiddleware, getStateAnalysis);    // State-wise employee count
 
 module.exports = router;
