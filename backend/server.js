@@ -7,15 +7,16 @@ const express = require('express');
 const cors = require('cors');
 const { connect } = require('./config/db');
 const { envConfig } = require('./config/env');
-const employeeRoutes   = require('./routes/employeeRoutes');
-const searchRoutes     = require('./routes/searchRoutes');     // Search System
-const analyticsRoutes  = require('./routes/analyticsRoutes'); // Analytics System
-const statsRoutes      = require('./routes/statsRoutes');      // Statistics System
-const adminRoutes      = require('./routes/adminRoutes');      // Admin (auth + role)
-const protectedRoutes  = require('./routes/protectedRoutes'); // Auth-protected CRUD
-const middlewareRoutes = require('./routes/middlewareRoutes'); // Middleware demos
-const authRoutes       = require('./routes/authRoutes');       // Authentication
-const jwtRoutes        = require('./routes/jwtRoutes');        // JWT operations
+const employeeRoutes    = require('./routes/employeeRoutes');
+const searchRoutes      = require('./routes/searchRoutes');
+const analyticsRoutes   = require('./routes/analyticsRoutes');
+const statsRoutes       = require('./routes/statsRoutes');
+const adminRoutes       = require('./routes/adminRoutes');
+const protectedRoutes   = require('./routes/protectedRoutes');
+const middlewareRoutes  = require('./routes/middlewareRoutes');
+const authRoutes        = require('./routes/authRoutes');
+const jwtRoutes         = require('./routes/jwtRoutes');
+
 const { errorMiddleware }       = require('./middlewares/errorMiddleware');
 const { loggerMiddleware }      = require('./middlewares/loggerMiddleware');
 const { requestTimeMiddleware } = require('./middlewares/requestTimeMiddleware');
@@ -58,15 +59,15 @@ app.get('/', (req, res) => {
 });
 
 // ─── API Routes ───────────────────────────────────────────────
-app.use('/employees',  employeeRoutes);                 // GET  /employees
-app.use('/search',     searchRoutes);                   // GET  /search/employees?q=keyword
-app.use('/analytics',  analyticsRoutes);                // GET  /analytics/employees/*
-app.use('/stats',      statsRoutes);                    // GET  /stats/employees/*
-app.use('/admin',      adminRoutes);                    // GET  /admin/* (auth + role)
-app.use('/protected',  protectedRoutes);                // POST /protected/* (auth)
-app.use('/middleware', middlewareRoutes);               // GET  /middleware/* (demos)
-app.use('/auth',       authRoutes);                     // POST /auth/register, /auth/login …
-app.use('/jwt',        jwtRoutes);                      // GET  /jwt/profile, /jwt/dashboard …
+app.use('/employees',  employeeRoutes);
+app.use('/search',     searchRoutes);
+app.use('/analytics',  analyticsRoutes);
+app.use('/stats',      statsRoutes);
+app.use('/admin',      adminRoutes);
+app.use('/protected',  protectedRoutes);
+app.use('/middleware', middlewareRoutes);
+app.use('/auth',       authRoutes);
+app.use('/jwt',        jwtRoutes);
 
 // ─── 404 Handler (Unknown Routes) ────────────────────────────
 app.use((req, res) => {
