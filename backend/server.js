@@ -10,6 +10,7 @@ const { envConfig } = require('./config/env');
 const employeeRoutes  = require('./routes/employeeRoutes');
 const searchRoutes    = require('./routes/searchRoutes');    // Search System
 const analyticsRoutes = require('./routes/analyticsRoutes'); // Analytics System
+const statsRoutes     = require('./routes/statsRoutes');     // Statistics System
 const { errorMiddleware } = require('./middlewares/errorMiddleware');
 const { loggerMiddleware } = require('./middlewares/loggerMiddleware');
 
@@ -43,6 +44,7 @@ app.get('/', (req, res) => {
 app.use('/employees', employeeRoutes);
 app.use('/search',    searchRoutes);     // GET /search/employees?q=keyword
 app.use('/analytics', analyticsRoutes);  // GET /analytics/employees/*
+app.use('/stats',     statsRoutes);      // GET /stats/employees/*
 
 // ─── 404 Handler (Unknown Routes) ────────────────────────────
 app.use((req, res) => {
