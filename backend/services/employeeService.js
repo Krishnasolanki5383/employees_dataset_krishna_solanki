@@ -5,22 +5,29 @@
 
 const Employee = require('../models/employeeModel');
 
-// ── PR 1: Whitelist of fields allowed for ?sort= query parameter ──────────────
+// ── Whitelist of fields allowed for ?sort= query parameter ────────────────────
 // Prevents arbitrary field injection. Any value outside this list falls
 // back to the default ('name' ascending).
+// 'lastUpdated' is a human-friendly alias for 'updatedAt' (PR combinations).
 const VALID_SORT_FIELDS = [
-  'name',          // Sort alphabetically by employee name
-  'experience',    // Sort by years of experience
-  'country',       // Sort by country
-  'state',         // Sort by state
-  'city',          // Sort by city
-  'domain',        // Sort by domain (used as 'project domain' proxy)
-  'timezone',      // Sort by timezone
-  'certifications',// Sort by certifications array (lexicographic)
-  'projects',      // Sort by projects array (lexicographic)
-  'tasks',         // Sort by tasks array (lexicographic)
-  'updatedAt',     // Sort by last-updated timestamp
+  'name',           // Sort alphabetically by employee name
+  'experience',     // Sort by years of experience
+  'country',        // Sort by country
+  'state',          // Sort by state
+  'city',           // Sort by city
+  'domain',         // Sort by domain (used as 'project domain' proxy)
+  'timezone',       // Sort by timezone
+  'certifications', // Sort by certifications array (lexicographic)
+  'projects',       // Sort by projects array (lexicographic)
+  'tasks',          // Sort by tasks array (lexicographic)
+  'updatedAt',      // Sort by last-updated timestamp
+  'lastUpdated',    // Human-friendly alias → maps to updatedAt internally
 ];
+
+// Maps human-friendly sort aliases to actual Mongoose/MongoDB field names
+const SORT_FIELD_MAP = {
+  lastUpdated: 'updatedAt',
+};
 
 // ══════════════════════════════════════════════════════════════
 //  SECTION 1: BASIC CRUD OPERATIONS
@@ -28,13 +35,39 @@ const VALID_SORT_FIELDS = [
 
 /**
  * GET /employees
- * Fetches all employees with:
+ * Single unified handler for ALL combination queries. No new routes needed.
  *   - Pagination  : ?page=1&limit=10
- *   - Sorting     : ?sort=createdAt&order=desc
+ *   - Sorting     : ?sort=<field>&order=asc|desc
  *   - Full-text   : ?search=nodejs
- *   - 15 query param filters (country, state, city, primarySkill,
- *     secondarySkill, domain, experience, verified, certification,
- *     timezone, project, task, technology, skill, emailVerified)
+ *   - Filters     : country, state, city, primarySkill, secondarySkill,
+ *                   domain, experience, verified, certification,
+ *                   timezone, project, task, technology, skill, emailVerified
+ *
+ * PR 1 — Filter + Sort combinations:
+ *   ?country=USA&sort=experience
+ *   ?state=RI&sort=name
+ *   ?city=Weberview&sort=experience
+ *   ?primarySkill=Java&sort=experience
+ *   ?domain=Cloud&sort=experience
+ *   ?experience=5&sort=name
+ *   ?verified=true&sort=lastUpdated
+ *   ?technology=Kubernetes&sort=experience
+ *
+ * PR 2 — Filter + Pagination combinations:
+ *   ?country=USA&page=1&limit=10
+ *   ?state=RI&page=1&limit=15
+ *   ?primarySkill=Java&page=1&limit=10
+ *   ?domain=Cloud&page=1&limit=20
+ *   ?sort=experience&page=1&limit=10
+ *   ?sort=name&page=2&limit=15
+ *
+ * PR 3 — Filter + Sort + Pagination combinations:
+ *   ?country=USA&sort=experience&page=1&limit=10
+ *   ?country=USA&primarySkill=Java&sort=experience&page=1&limit=10
+ *   ?domain=AI&verified=true&sort=lastUpdated&page=1&limit=10
+ *   ?country=USA&domain=Finance&technology=GCP&sort=experience&page=1&limit=10
+ *
+ * Note: 'lastUpdated' is a sort alias for the 'updatedAt' field.
  * Checklist #6: pagination, sorting, search, dynamic filtering
  */
 const getAllEmployees = async (queryParams) => {
@@ -42,8 +75,8 @@ const getAllEmployees = async (queryParams) => {
     // ── Pagination & sorting ──────────────────────────────────
     page  = 1,
     limit = 10,
-    sort  = 'name',   // PR 1: default sort field changed to 'name' (asc)
-    order = 'asc',    // PR 1: default order changed to 'asc' to match name-sort UX
+    sort  = 'name',   // default sort field; 'lastUpdated' alias also accepted
+    order = 'asc',    // default order: asc | desc
     // ── Full-text search ──────────────────────────────────────
     search = '',
     // ── 15 Query-parameter filters ────────────────────────────
@@ -74,7 +107,10 @@ const getAllEmployees = async (queryParams) => {
   if (secondarySkill) filter.secondarySkill = new RegExp(secondarySkill, 'i');
   if (domain)         filter.domain         = new RegExp(domain, 'i');
   if (timezone)       filter.timezone       = new RegExp(timezone, 'i');
-  if (technology)     filter.technologies   = new RegExp(technology, 'i');
+
+  // technology — searches secondarySkill field (schema has no separate 'technologies' array)
+  // Supports: ?technology=Kubernetes, ?technology=Node.js, ?technology=React, ?technology=GCP
+  if (technology)     filter.secondarySkill = new RegExp(technology, 'i');
 
   // Numeric: experience >= N years
   if (experience)     filter.experience     = { $gte: Number(experience) };
@@ -119,29 +155,34 @@ const getAllEmployees = async (queryParams) => {
     }
   }
 
-  // ── Step 3: Pagination, sorting, query ──────────────────────
-  //
-  // PR 1 — Dynamic sort with whitelist validation:
+  // ── Step 3: Build sort object ────────────────────────────────
   //   • Only fields in VALID_SORT_FIELDS are accepted.
+  //   • 'lastUpdated' alias maps to 'updatedAt' via SORT_FIELD_MAP.
   //   • Unknown/missing sort param falls back to { name: 1 }.
-  //   • ?order=desc  → -1  |  anything else (incl. 'asc') → 1
+  //   • ?order=desc → -1  |  anything else (incl. 'asc') → 1
+  const resolvedSortField = VALID_SORT_FIELDS.includes(sort)
+    ? (SORT_FIELD_MAP[sort] || sort)   // resolve alias if present
+    : 'name';                          // fallback to default
+  const resolvedOrder = order === 'desc' ? -1 : 1;
+  const sortObject    = { [resolvedSortField]: resolvedOrder };
+
+  // ── Step 4: Pagination ───────────────────────────────────────
   const skip = (Number(page) - 1) * Number(limit);
 
-  const resolvedSort  = VALID_SORT_FIELDS.includes(sort) ? sort : 'name';
-  const resolvedOrder = order === 'desc' ? -1 : 1;
-  const sortObject    = { [resolvedSort]: resolvedOrder };
+  // ── Step 5: Execute query ────────────────────────────────────
+  const pageNum  = Number(page);
+  const limitNum = Number(limit);
 
   const total     = await Employee.countDocuments(filter);
   const employees = await Employee.find(filter)
     .sort(sortObject)
     .skip(skip)
-    .limit(Number(limit))
+    .limit(limitNum)
     .select('-__v');
 
-  const pageNum    = Number(page);
-  const limitNum   = Number(limit);
   const totalPages = Math.ceil(total / limitNum);
 
+  // ── Step 6: Return data + metadata ──────────────────────────
   return {
     pagination: {
       currentPage:  pageNum,
@@ -151,9 +192,9 @@ const getAllEmployees = async (queryParams) => {
       hasNextPage:  pageNum < totalPages,
       hasPrevPage:  pageNum > 1,
     },
-    // PR 1 — Show which sort was actually applied (useful for debugging)
+    // Show which sort was actually applied (useful for debugging combinations)
     appliedSort: {
-      field:     resolvedSort,
+      field:     resolvedSortField,
       direction: resolvedOrder === 1 ? 'asc' : 'desc',
     },
     appliedFilters: {
