@@ -1,7 +1,8 @@
 import React from 'react';
 import { useAuth } from '../../hooks/useAuth';
-import { FiLogOut, FiUser } from 'react-icons/fi';
+import { FiLogOut } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
+import { getInitials } from '../../utils/helpers';
 
 const Navbar = ({ onMenuToggle }) => {
   const { user, logout } = useAuth();
@@ -31,8 +32,8 @@ const Navbar = ({ onMenuToggle }) => {
               <p className="text-sm font-semibold text-white">{user.name || user.email}</p>
               <p className="text-xs text-brand-textMuted capitalize">{user.role}</p>
             </div>
-            <div className="h-9 w-9 rounded-full bg-brand-primary/10 border border-brand-primary/30 flex items-center justify-center text-brand-primary">
-              <FiUser className="h-5 w-5" />
+            <div className="h-9 w-9 rounded-full bg-brand-primary/10 border border-brand-primary/30 flex items-center justify-center text-brand-primary font-bold text-xs">
+              {getInitials(user.name || user.email)}
             </div>
             <button
               onClick={logout}
