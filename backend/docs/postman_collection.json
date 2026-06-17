@@ -1,42 +1,3534 @@
 {
   "info": {
     "name": "Employee Management System API",
-    "description": "Complete Postman collection for all Employee Management API endpoints",
+    "description": "Complete Postman collection for all Employee Management API endpoints (80+ routes)",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
-    { "key": "base_url", "value": "http://localhost:5000" },
-    { "key": "token",    "value": "paste_your_jwt_token_here" }
+    {
+      "key": "base_url",
+      "value": "http://localhost:5000",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "paste_your_jwt_token_here",
+      "type": "string"
+    }
   ],
   "item": [
     {
-      "name": "🔧 CRUD",
+      "name": "System Health",
       "item": [
-        { "name": "GET All Employees",   "request": { "method": "GET",    "url": "{{base_url}}/employees",     "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}" }] } } },
-        { "name": "GET Employee By ID",  "request": { "method": "GET",    "url": "{{base_url}}/employees/:id", "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}" }] } } },
-        { "name": "POST Create Employee","request": { "method": "POST",   "url": "{{base_url}}/employees",     "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}" }] }, "body": { "mode": "raw", "raw": "{\n  \"name\": \"Krishna Solanki\",\n  \"email\": \"krishna@example.com\",\n  \"primarySkill\": \"Node.js\",\n  \"experience\": 3\n}", "options": { "raw": { "language": "json" } } } } },
-        { "name": "PUT Replace Employee","request": { "method": "PUT",    "url": "{{base_url}}/employees/:id", "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}" }] } } },
-        { "name": "PATCH Update Employee","request":{ "method": "PATCH",  "url": "{{base_url}}/employees/:id", "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}" }] } } },
-        { "name": "DELETE Employee",     "request": { "method": "DELETE", "url": "{{base_url}}/employees/:id", "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}" }] } } }
+        {
+          "name": "GET API Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": []
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        }
       ]
     },
     {
-      "name": "📦 Bulk Operations",
+      "name": "Authentication & Profile",
+      "description": "User registration, login, logout, password resets, email verification, and OTP handling.",
       "item": [
-        { "name": "POST Bulk Create", "request": { "method": "POST",   "url": "{{base_url}}/employees/bulk-create", "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}" }] } } },
-        { "name": "PATCH Bulk Update","request": { "method": "PATCH",  "url": "{{base_url}}/employees/bulk-update", "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}" }] } } },
-        { "name": "DELETE Bulk Delete","request":{ "method": "DELETE", "url": "{{base_url}}/employees/bulk-delete", "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}" }] } } }
+        {
+          "name": "POST Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john.doe@example.com\",\n  \"password\": \"securepassword123\",\n  \"role\": \"user\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    if (jsonData.data && jsonData.data.token) {",
+                  "        pm.collectionVariables.set(\"token\", jsonData.data.token);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john.doe@example.com\",\n  \"password\": \"securepassword123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    if (jsonData.data && jsonData.data.token) {",
+                  "        pm.collectionVariables.set(\"token\", jsonData.data.token);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST Logout",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/auth/logout",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "logout"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "GET User Profile",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/auth/profile",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "profile"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "PATCH Update Profile",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/profile",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "profile"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"John Doe Junior\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "DELETE Profile",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/auth/profile",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "profile"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "POST Forgot Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/forgot-password",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "forgot-password"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john.doe@example.com\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "POST Reset Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/reset-password",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "reset-password"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"your_reset_token\",\n  \"newPassword\": \"newsecurepassword123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "POST Change Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/change-password",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "change-password"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"oldPassword\": \"securepassword123\",\n  \"newPassword\": \"newsecurepassword123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "POST Verify Email",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/verify-email",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "verify-email"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"your_verification_token\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "POST Send OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/send-otp",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "send-otp"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john.doe@example.com\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "POST Verify OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/verify-otp",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "verify-otp"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john.doe@example.com\",\n  \"otp\": \"123456\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "POST Resend Verification",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/resend-verification",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "resend-verification"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john.doe@example.com\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
       ]
     },
     {
-      "name": "🔍 Filters",
+      "name": "JWT Testing & Operations",
+      "description": "Endpoints for token verification, generation, token refreshing, revocation, and viewing private data.",
       "item": [
-        { "name": "By Name",            "request": { "method": "GET", "url": "{{base_url}}/employees/name/:name",               "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}" }] } } },
-        { "name": "By Primary Skill",   "request": { "method": "GET", "url": "{{base_url}}/employees/primary-skill/:skill",     "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}" }] } } },
-        { "name": "By Domain",          "request": { "method": "GET", "url": "{{base_url}}/employees/domain/:domain",           "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}" }] } } },
-        { "name": "By Country",         "request": { "method": "GET", "url": "{{base_url}}/employees/country/:country",         "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}" }] } } },
-        { "name": "Verified Employees", "request": { "method": "GET", "url": "{{base_url}}/employees/verified",                 "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}" }] } } },
-        { "name": "Top Experience",     "request": { "method": "GET", "url": "{{base_url}}/employees/top-experience",           "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}" }] } } }
+        {
+          "name": "POST Generate Token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/jwt/generate-token",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "jwt",
+                "generate-token"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": \"user123\",\n  \"email\": \"test@example.com\",\n  \"role\": \"admin\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    if (jsonData.data && jsonData.data.accessToken) {",
+                  "        pm.collectionVariables.set(\"token\", jsonData.data.accessToken);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST Verify Token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/jwt/verify-token",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "jwt",
+                "verify-token"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"{{token}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "POST Refresh Token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/jwt/refresh-token",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "jwt",
+                "refresh-token"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"your_refresh_token_here\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "DELETE Revoke Token",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/jwt/revoke-token",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "jwt",
+                "revoke-token"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"{{token}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "GET JWT Profile",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/jwt/profile",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "jwt",
+                "profile"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET JWT Dashboard",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/jwt/dashboard",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "jwt",
+                "dashboard"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET Private Employees",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/jwt/private-employees?page=1&limit=10",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "jwt",
+                "private-employees"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Query parameter page"
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "description": "Query parameter limit"
+                }
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET Private Projects",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/jwt/private-projects?page=1&limit=10",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "jwt",
+                "private-projects"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Query parameter page"
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "description": "Query parameter limit"
+                }
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET Private Tasks",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/jwt/private-tasks?page=1&limit=10",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "jwt",
+                "private-tasks"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Query parameter page"
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "description": "Query parameter limit"
+                }
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET Private Analytics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/jwt/private-analytics",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "jwt",
+                "private-analytics"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Employee Core CRUD",
+      "description": "Standard REST operations on individual employee records.",
+      "item": [
+        {
+          "name": "GET All Employees",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/employees?page=1&limit=10&sort=name&order=asc",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "employees"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Query parameter page"
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "description": "Query parameter limit"
+                },
+                {
+                  "key": "sort",
+                  "value": "name",
+                  "description": "Query parameter sort"
+                },
+                {
+                  "key": "order",
+                  "value": "asc",
+                  "description": "Query parameter order"
+                }
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "POST Create Employee",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/employees",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "employees"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john.doe@example.com\",\n  \"phone\": \"+1234567890\",\n  \"city\": \"San Francisco\",\n  \"state\": \"California\",\n  \"country\": \"USA\",\n  \"timezone\": \"America/Los_Angeles\",\n  \"primarySkill\": \"Node.js\",\n  \"secondarySkill\": \"React\",\n  \"domain\": \"Engineering\",\n  \"experience\": 5,\n  \"certifications\": [\n    \"AWS Solutions Architect\",\n    \"MongoDB Certified Developer\"\n  ],\n  \"projects\": [\n    \"Employee Management Portal\",\n    \"Customer Analytics\"\n  ],\n  \"tasks\": [\n    \"Design Database Schema\",\n    \"Implement Authentication\"\n  ],\n  \"isVerified\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "GET Employee By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/employees/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "employees",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "6650f3a2e4b0c1234abcd001",
+                  "description": "Path variable for id"
+                }
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "PUT Replace Employee",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/employees/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "employees",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "6650f3a2e4b0c1234abcd001",
+                  "description": "Path variable for id"
+                }
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john.doe@example.com\",\n  \"phone\": \"+1234567890\",\n  \"city\": \"San Francisco\",\n  \"state\": \"California\",\n  \"country\": \"USA\",\n  \"timezone\": \"America/Los_Angeles\",\n  \"primarySkill\": \"Node.js\",\n  \"secondarySkill\": \"React\",\n  \"domain\": \"Engineering\",\n  \"experience\": 5,\n  \"certifications\": [\n    \"AWS Solutions Architect\",\n    \"MongoDB Certified Developer\"\n  ],\n  \"projects\": [\n    \"Employee Management Portal\",\n    \"Customer Analytics\"\n  ],\n  \"tasks\": [\n    \"Design Database Schema\",\n    \"Implement Authentication\"\n  ],\n  \"isVerified\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "PATCH Update Employee",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/employees/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "employees",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "6650f3a2e4b0c1234abcd001",
+                  "description": "Path variable for id"
+                }
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"experience\": 6,\n  \"city\": \"Seattle\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "DELETE Employee",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/employees/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "employees",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "6650f3a2e4b0c1234abcd001",
+                  "description": "Path variable for id"
+                }
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET Check Employee Exists",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/employees/exists/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "employees",
+                "exists",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "6650f3a2e4b0c1234abcd001",
+                  "description": "Path variable for id"
+                }
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Bulk Operations",
+      "description": "Endpoints to insert, modify, or delete multiple employees in a single request.",
+      "item": [
+        {
+          "name": "POST Bulk Create",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/employees/bulk-create",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "employees",
+                "bulk-create"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"employees\": [\n    {\n      \"name\": \"Alice Smith\",\n      \"email\": \"alice.smith@example.com\",\n      \"primarySkill\": \"Java\",\n      \"experience\": 4\n    },\n    {\n      \"name\": \"Bob Miller\",\n      \"email\": \"bob.miller@example.com\",\n      \"primarySkill\": \"Go\",\n      \"experience\": 2\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "PATCH Bulk Update",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/employees/bulk-update",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "employees",
+                "bulk-update"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"updates\": [\n    {\n      \"id\": \"6650f3a2e4b0c1234abcd001\",\n      \"data\": {\n        \"isVerified\": true,\n        \"experience\": 8\n      }\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "DELETE Bulk Delete",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/employees/bulk-delete",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "employees",
+                "bulk-delete"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ids\": [\n    \"6650f3a2e4b0c1234abcd001\",\n    \"6650f3a2e4b0c1234abcd002\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Filters & Queries",
+      "description": "Specific filters for extracting subsets of employee data.",
+      "item": [
+        {
+          "name": "Location Filters",
+          "item": [
+            {
+              "name": "GET By Name",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/employees/name/:name",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "employees",
+                    "name",
+                    ":name"
+                  ],
+                  "variable": [
+                    {
+                      "key": "name",
+                      "value": "John Doe",
+                      "description": "Path variable for name"
+                    }
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "GET By State",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/employees/state/:state",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "employees",
+                    "state",
+                    ":state"
+                  ],
+                  "variable": [
+                    {
+                      "key": "state",
+                      "value": "California",
+                      "description": "Path variable for state"
+                    }
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "GET By Country",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/employees/country/:country",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "employees",
+                    "country",
+                    ":country"
+                  ],
+                  "variable": [
+                    {
+                      "key": "country",
+                      "value": "USA",
+                      "description": "Path variable for country"
+                    }
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "GET By City",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/employees/city/:city",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "employees",
+                    "city",
+                    ":city"
+                  ],
+                  "variable": [
+                    {
+                      "key": "city",
+                      "value": "San Francisco",
+                      "description": "Path variable for city"
+                    }
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "GET By Timezone",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/employees/timezone/:timezone",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "employees",
+                    "timezone",
+                    ":timezone"
+                  ],
+                  "variable": [
+                    {
+                      "key": "timezone",
+                      "value": "America/Los_Angeles",
+                      "description": "Path variable for timezone"
+                    }
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Skills & Domain Filters",
+          "item": [
+            {
+              "name": "GET By Primary Skill",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/employees/primary-skill/:skill",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "employees",
+                    "primary-skill",
+                    ":skill"
+                  ],
+                  "variable": [
+                    {
+                      "key": "skill",
+                      "value": "Node.js",
+                      "description": "Path variable for skill"
+                    }
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "GET By Secondary Skill",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/employees/secondary-skill/:skill",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "employees",
+                    "secondary-skill",
+                    ":skill"
+                  ],
+                  "variable": [
+                    {
+                      "key": "skill",
+                      "value": "Node.js",
+                      "description": "Path variable for skill"
+                    }
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "GET By Domain",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/employees/domain/:domain",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "employees",
+                    "domain",
+                    ":domain"
+                  ],
+                  "variable": [
+                    {
+                      "key": "domain",
+                      "value": "Engineering",
+                      "description": "Path variable for domain"
+                    }
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "GET By Experience",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/employees/experience/:years",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "employees",
+                    "experience",
+                    ":years"
+                  ],
+                  "variable": [
+                    {
+                      "key": "years",
+                      "value": "5",
+                      "description": "Path variable for years"
+                    }
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "GET By Certification",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/employees/certification/:cert",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "employees",
+                    "certification",
+                    ":cert"
+                  ],
+                  "variable": [
+                    {
+                      "key": "cert",
+                      "value": "AWS",
+                      "description": "Path variable for cert"
+                    }
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Array Lookups",
+          "item": [
+            {
+              "name": "GET By Project",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/employees/project/:projectId",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "employees",
+                    "project",
+                    ":projectId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "projectId",
+                      "value": "Employee Management Portal",
+                      "description": "Path variable for projectId"
+                    }
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "GET By Task",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/employees/task/:taskId",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "employees",
+                    "task",
+                    ":taskId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "taskId",
+                      "value": "Design Database Schema",
+                      "description": "Path variable for taskId"
+                    }
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Sorting Routes",
+          "item": [
+            {
+              "name": "GET Sort Experience Desc",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/employees/sort/experience-desc",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "employees",
+                    "sort",
+                    "experience-desc"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "GET Sort Name Asc",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/employees/sort/name-asc",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "employees",
+                    "sort",
+                    "name-asc"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "GET Sort Project Asc",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/employees/sort/project-asc",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "employees",
+                    "sort",
+                    "project-asc"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "GET Sort Domain Asc",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/employees/sort/domain-asc",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "employees",
+                    "sort",
+                    "domain-asc"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "GET Sort Certification Desc",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/employees/sort/certification-desc",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "employees",
+                    "sort",
+                    "certification-desc"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "GET Sort Last Updated Desc",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/employees/sort/lastUpdated-desc",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "employees",
+                    "sort",
+                    "lastUpdated-desc"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Analytics & Performance",
+          "item": [
+            {
+              "name": "GET Employee Performance Summary",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/employees/performance/:id",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "employees",
+                    "performance",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "6650f3a2e4b0c1234abcd001",
+                      "description": "Path variable for id"
+                    }
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "GET Employee Stats Summary",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/employees/stats/:id",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "employees",
+                    "stats",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "6650f3a2e4b0c1234abcd001",
+                      "description": "Path variable for id"
+                    }
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Static Filters (No Params)",
+          "item": [
+            {
+              "name": "GET Verified Employees",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/employees/verified",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "employees",
+                    "verified"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "GET All Employee Projects",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/employees/projects",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "employees",
+                    "projects"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "GET All Employee Tasks",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/employees/tasks",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "employees",
+                    "tasks"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "GET Top Experience",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/employees/top-experience",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "employees",
+                    "top-experience"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "GET Top Skills",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/employees/top-skills",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "employees",
+                    "top-skills"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "GET Cloud Engineers",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/employees/cloud-engineers",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "employees",
+                    "cloud-engineers"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "GET DevOps Engineers",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/employees/devops-engineers",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "employees",
+                    "devops-engineers"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "GET AI Engineers",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/employees/ai-engineers",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "employees",
+                    "ai-engineers"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "GET Full Stack Developers",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/employees/fullstack",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "employees",
+                    "fullstack"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "GET Recent Certifications",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/employees/recent-certifications",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "employees",
+                    "recent-certifications"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Search",
+      "description": "Unified keyword search across multiple fields.",
+      "item": [
+        {
+          "name": "GET Search Employees",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/search/employees?q=Node.js&page=1&limit=10",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "search",
+                "employees"
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "Node.js",
+                  "description": "Query parameter q"
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Query parameter page"
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "description": "Query parameter limit"
+                }
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Analytics (Aggregation)",
+      "description": "MongoDB Aggregation Pipeline results for metrics, charts, and distribution breakdowns.",
+      "item": [
+        {
+          "name": "GET Top Skills Breakdown",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/analytics/employees/top-skills",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "analytics",
+                "employees",
+                "top-skills"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET Top Domains Breakdown",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/analytics/employees/top-domains",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "analytics",
+                "employees",
+                "top-domains"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET Top Certifications",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/analytics/employees/top-certifications",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "analytics",
+                "employees",
+                "top-certifications"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET Top Projects Breakdown",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/analytics/employees/top-projects",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "analytics",
+                "employees",
+                "top-projects"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET Top Technologies",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/analytics/employees/top-technologies",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "analytics",
+                "employees",
+                "top-technologies"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET Skill Distribution",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/analytics/employees/skill-distribution",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "analytics",
+                "employees",
+                "skill-distribution"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET Domain Distribution",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/analytics/employees/domain-distribution",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "analytics",
+                "employees",
+                "domain-distribution"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET Experience Bands Analysis",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/analytics/employees/experience-analysis",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "analytics",
+                "employees",
+                "experience-analysis"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET Verification Ratios",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/analytics/employees/verification-analysis",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "analytics",
+                "employees",
+                "verification-analysis"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET Timezone Grouping Breakdown",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/analytics/employees/timezone-analysis",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "analytics",
+                "employees",
+                "timezone-analysis"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Statistics",
+      "description": "Count statistical endpoints and array property metrics.",
+      "item": [
+        {
+          "name": "GET Total Employees Count",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/stats/employees/count",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "stats",
+                "employees",
+                "count"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET Verified Count",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/stats/employees/verified-count",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "stats",
+                "employees",
+                "verified-count"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET Count By Country",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/stats/employees/country-count",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "stats",
+                "employees",
+                "country-count"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET Count By Domain",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/stats/employees/domain-count",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "stats",
+                "employees",
+                "domain-count"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET Count By Skill",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/stats/employees/skill-count",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "stats",
+                "employees",
+                "skill-count"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET Count By State",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/stats/employees/state-count",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "stats",
+                "employees",
+                "state-count"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET Timezone Count",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/stats/employees/timezone-count",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "stats",
+                "employees",
+                "timezone-count"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET Certification Count",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/stats/employees/certification-count",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "stats",
+                "employees",
+                "certification-count"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET Project Distribution",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/stats/employees/project-distribution",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "stats",
+                "employees",
+                "project-distribution"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET Task Distribution",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/stats/employees/task-distribution",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "stats",
+                "employees",
+                "task-distribution"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET Average Experience",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/stats/employees/experience-average",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "stats",
+                "employees",
+                "experience-average"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET Top Experience List",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/stats/employees/top-experience",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "stats",
+                "employees",
+                "top-experience"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET Total Projects Count",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/stats/employees/project-count",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "stats",
+                "employees",
+                "project-count"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET Total Tasks Count",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/stats/employees/task-count",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "stats",
+                "employees",
+                "task-count"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET Technology Count Breakdown",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/stats/employees/technology-count",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "stats",
+                "employees",
+                "technology-count"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin Controls",
+      "description": "Role-based routes restricted strictly to users with role='admin' in their JWT payload.",
+      "item": [
+        {
+          "name": "GET Admin All Employees",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/admin/employees",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin",
+                "employees"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET Admin All Projects",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/admin/projects",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin",
+                "projects"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET Admin All Tasks",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/admin/tasks",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin",
+                "tasks"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET Admin Certifications List",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/admin/certifications",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin",
+                "certifications"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Protected Routes & Projects",
+      "description": "Specific CRUD endpoints protected by authentication, including project arrays operations placeholders.",
+      "item": [
+        {
+          "name": "POST Protected Create Employee",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/protected/employees",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "protected",
+                "employees"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john.doe@example.com\",\n  \"phone\": \"+1234567890\",\n  \"city\": \"San Francisco\",\n  \"state\": \"California\",\n  \"country\": \"USA\",\n  \"timezone\": \"America/Los_Angeles\",\n  \"primarySkill\": \"Node.js\",\n  \"secondarySkill\": \"React\",\n  \"domain\": \"Engineering\",\n  \"experience\": 5,\n  \"certifications\": [\n    \"AWS Solutions Architect\",\n    \"MongoDB Certified Developer\"\n  ],\n  \"projects\": [\n    \"Employee Management Portal\",\n    \"Customer Analytics\"\n  ],\n  \"tasks\": [\n    \"Design Database Schema\",\n    \"Implement Authentication\"\n  ],\n  \"isVerified\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "PATCH Protected Update Employee",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/protected/employees/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "protected",
+                "employees",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "6650f3a2e4b0c1234abcd001",
+                  "description": "Path variable for id"
+                }
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"experience\": 6\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "DELETE Protected Delete Employee",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/protected/employees/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "protected",
+                "employees",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "6650f3a2e4b0c1234abcd001",
+                  "description": "Path variable for id"
+                }
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "POST Protected Create Project",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/protected/projects",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "protected",
+                "projects"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "PATCH Protected Update Project",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/protected/projects/:projectId",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "protected",
+                "projects",
+                ":projectId"
+              ],
+              "variable": [
+                {
+                  "key": "projectId",
+                  "value": "Employee Management Portal",
+                  "description": "Path variable for projectId"
+                }
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "DELETE Protected Delete Project",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/protected/projects/:projectId",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "protected",
+                "projects",
+                ":projectId"
+              ],
+              "variable": [
+                {
+                  "key": "projectId",
+                  "value": "Employee Management Portal",
+                  "description": "Path variable for projectId"
+                }
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Middleware Practice",
+      "description": "Isolated testing routes to demonstrate each middleware's execution logic.",
+      "item": [
+        {
+          "name": "GET Demo Logger",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/middleware/logger",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "middleware",
+                "logger"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "GET Demo Auth",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/middleware/auth",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "middleware",
+                "auth"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET Demo Rate Limit",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/middleware/rate-limit",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "middleware",
+                "rate-limit"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "GET Demo Error Handler",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/middleware/error-handler",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "middleware",
+                "error-handler"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "GET Demo Request Time",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/middleware/request-time",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "middleware",
+                "request-time"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "GET Demo Role Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/middleware/role-check",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "middleware",
+                "role-check"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET Demo Validation Rules",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/middleware/validation",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "middleware",
+                "validation"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        },
+        {
+          "name": "GET Demo Audit Log",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/middleware/audit-log",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "middleware",
+                "audit-log"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        }
       ]
     }
   ]
