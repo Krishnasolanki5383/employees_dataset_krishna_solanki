@@ -1,5 +1,4 @@
 import React, { createContext, useState, useEffect } from 'react';
-import axiosInstance from '../api/axiosInstance';
 
 export const AuthContext = createContext(null);
 
@@ -9,18 +8,13 @@ export const AuthProvider = ({ children }) => {
     return savedUser ? JSON.parse(savedUser) : null;
   });
   const [token, setToken] = useState(() => localStorage.getItem('token') || null);
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const login = async (email, password) => {
-    const response = await axiosInstance.post('/auth/login', { email, password });
-    const { token: receivedToken, user: receivedUser } = response.data;
-    
-    localStorage.setItem('token', receivedToken);
-    localStorage.setItem('user', JSON.stringify(receivedUser));
-    
-    setToken(receivedToken);
-    setUser(receivedUser);
-    return response.data;
+  const login = (userData, userToken) => {
+    localStorage.setItem('token', userToken);
+    localStorage.setItem('user', JSON.stringify(userData));
+    setToken(userToken);
+    setUser(userData);
   };
 
   const logout = () => {
@@ -30,17 +24,9 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
-  const registerUser = async (userData) => {
-    const response = await axiosInstance.post('/auth/register', userData);
-    return response.data;
-  };
-
-  const updateProfile = async (profileData) => {
-    const response = await axiosInstance.patch('/auth/profile', profileData);
-    const updatedUser = response.data.user;
-    localStorage.setItem('user', JSON.stringify(updatedUser));
-    setUser(updatedUser);
-    return response.data;
+  const updateUser = (userData) => {
+    localStorage.setItem('user', JSON.stringify(userData));
+    setUser(userData);
   };
 
   useEffect(() => {
@@ -49,7 +35,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     window.addEventListener('auth-logout', handleAuthLogout);
-    setLoading(false);
+    setIsLoading(false);
 
     return () => {
       window.removeEventListener('auth-logout', handleAuthLogout);
@@ -59,13 +45,11 @@ export const AuthProvider = ({ children }) => {
   const value = {
     user,
     token,
-    loading,
     isAuthenticated: !!token,
-    isAdmin: user?.role === 'admin',
+    isLoading,
     login,
     logout,
-    register: registerUser,
-    updateProfile
+    updateUser,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
