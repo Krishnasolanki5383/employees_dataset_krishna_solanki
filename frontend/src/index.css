@@ -1,32 +1,32 @@
 @import "tailwindcss";
 
 :root {
-  --color-brand-primary: #3B82F6;
-  --color-brand-bg: #F3F4F6;
-  --color-brand-card: #FFFFFF;
-  --color-brand-text: #111827;
-  --color-brand-textMuted: #4B5563;
-  --color-brand-accent: #10B981;
-  --color-brand-danger: #EF4444;
-  --color-brand-warning: #F59E0B;
+  --sys-brand-primary: #3B82F6;
+  --sys-brand-bg: #F3F4F6;
+  --sys-brand-card: #FFFFFF;
+  --sys-brand-text: #111827;
+  --sys-brand-text-muted: #4B5563;
+  --sys-brand-accent: #10B981;
+  --sys-brand-danger: #EF4444;
+  --sys-brand-warning: #F59E0B;
 }
 
 .dark {
-  --color-brand-bg: #111827;
-  --color-brand-card: #1F2937;
-  --color-brand-text: #F9FAFB;
-  --color-brand-textMuted: #9CA3AF;
+  --sys-brand-bg: #111827;
+  --sys-brand-card: #1F2937;
+  --sys-brand-text: #F9FAFB;
+  --sys-brand-text-muted: #9CA3AF;
 }
 
 @theme {
-  --color-brand-primary: var(--color-brand-primary);
-  --color-brand-bg: var(--color-brand-bg);
-  --color-brand-card: var(--color-brand-card);
-  --color-brand-text: var(--color-brand-text);
-  --color-brand-textMuted: var(--color-brand-textMuted);
-  --color-brand-accent: var(--color-brand-accent);
-  --color-brand-danger: var(--color-brand-danger);
-  --color-brand-warning: var(--color-brand-warning);
+  --color-brand-primary: var(--sys-brand-primary);
+  --color-brand-bg: var(--sys-brand-bg);
+  --color-brand-card: var(--sys-brand-card);
+  --color-brand-text: var(--sys-brand-text);
+  --color-brand-textMuted: var(--sys-brand-text-muted);
+  --color-brand-accent: var(--sys-brand-accent);
+  --color-brand-danger: var(--sys-brand-danger);
+  --color-brand-warning: var(--sys-brand-warning);
 }
 
 body {
