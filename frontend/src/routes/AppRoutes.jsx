@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Routes, Route, Navigate, Outlet } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import { useAuth } from '../hooks/useAuth';
 import Loader from '../components/common/Loader';
 import Navbar from '../components/common/Navbar';
@@ -17,10 +18,10 @@ import NotFound from '../pages/NotFound';
 
 // Protected Routes Layout Wrapper
 const ProtectedLayout = () => {
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  if (loading) {
+  if (isLoading) {
     return <Loader fullPage={true} message="Authenticating session..." />;
   }
 
@@ -44,9 +45,9 @@ const ProtectedLayout = () => {
 
 // Public Routes Layout Wrapper (prevent signed-in users from accessing Login/Register)
 const PublicLayout = () => {
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
 
-  if (loading) {
+  if (isLoading) {
     return <Loader fullPage={true} message="Verifying session..." />;
   }
 
@@ -58,6 +59,16 @@ const PublicLayout = () => {
 };
 
 const AppRoutes = () => {
+  const theme = useSelector((state) => state.ui.theme);
+
+  useEffect(() => {
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [theme]);
+
   return (
     <Routes>
       {/* Public Routes */}
@@ -81,3 +92,4 @@ const AppRoutes = () => {
 };
 
 export default AppRoutes;
+
