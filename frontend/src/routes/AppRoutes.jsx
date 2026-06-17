@@ -17,10 +17,10 @@ import NotFound from '../pages/NotFound';
 
 // Protected Routes Layout Wrapper
 const ProtectedLayout = () => {
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  if (loading) {
+  if (isLoading) {
     return <Loader fullPage={true} message="Authenticating session..." />;
   }
 
@@ -44,9 +44,9 @@ const ProtectedLayout = () => {
 
 // Public Routes Layout Wrapper (prevent signed-in users from accessing Login/Register)
 const PublicLayout = () => {
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
 
-  if (loading) {
+  if (isLoading) {
     return <Loader fullPage={true} message="Verifying session..." />;
   }
 
