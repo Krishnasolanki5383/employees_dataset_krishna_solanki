@@ -1,4 +1,6 @@
 import axios from 'axios';
+import { store } from '../store';
+import { logoutSuccess } from '../store/authSlice';
 
 const axiosInstance = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000',
@@ -24,13 +26,12 @@ axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response && error.response.status === 401) {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      // Dispatch a custom event to notify AuthContext to log out if mounted
-      window.dispatchEvent(new Event('auth-logout'));
+      // Dispatch Redux logout action directly to sync auth state across layouts immediately
+      store.dispatch(logoutSuccess());
     }
     return Promise.reject(error);
   }
 );
 
 export default axiosInstance;
+
