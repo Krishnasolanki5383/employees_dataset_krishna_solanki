@@ -42,7 +42,12 @@ const Register = () => {
         navigate('/login');
       }, 2000);
     } catch (err) {
-      setError(err.response?.data?.message || 'Registration failed. Check password criteria.');
+      const serverErrors = err.response?.data?.errors;
+      if (Array.isArray(serverErrors) && serverErrors.length > 0) {
+        setError(serverErrors);
+      } else {
+        setError(err.response?.data?.message || 'Registration failed. Check password criteria.');
+      }
     } finally {
       setLoading(false);
     }
@@ -59,7 +64,15 @@ const Register = () => {
 
         {error && (
           <div className="bg-brand-danger/10 border border-brand-danger/20 rounded-lg p-3 text-xs text-brand-danger">
-            {error}
+            {Array.isArray(error) ? (
+              <ul className="list-disc pl-4 space-y-1">
+                {error.map((err, i) => (
+                  <li key={i}>{err}</li>
+                ))}
+              </ul>
+            ) : (
+              error
+            )}
           </div>
         )}
 
