@@ -1,23 +1,20 @@
-import { useContext } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { AuthContext } from '../context/AuthContext';
 import axiosInstance from '../api/axiosInstance';
+import { loginSuccess, logoutSuccess, updateUser as updateAuthUser } from '../store/authSlice';
 
 export const useAuth = () => {
-  const context = useContext(AuthContext);
+  const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-
-  const { login: contextLogin, logout: contextLogout, updateUser, ...authState } = context;
+  const { user, token, isAuthenticated } = useSelector((state) => state.auth);
+  const isLoading = false; // Synchronous localStorage retrieval makes loading immediate
 
   const login = async (email, password) => {
     const response = await axiosInstance.post('/auth/login', { email, password });
-    const { token, user } = response.data;
-    contextLogin(user, token);
-    return user;
+    const { token: userToken, user: userData } = response.data.data;
+    dispatch(loginSuccess({ user: userData, token: userToken }));
+    return userData;
   };
 
   const register = async (name, email, password) => {
@@ -26,23 +23,27 @@ export const useAuth = () => {
   };
 
   const logout = () => {
-    contextLogout();
+    dispatch(logoutSuccess());
     navigate('/login');
   };
 
   const getProfile = async () => {
     const response = await axiosInstance.get('/auth/profile');
-    const user = response.data.user;
-    updateUser(user);
-    return user;
+    const userData = response.data.data;
+    dispatch(updateAuthUser(userData));
+    return userData;
   };
 
   return {
-    ...authState,
+    user,
+    token,
+    isAuthenticated,
+    isLoading,
     login,
     register,
     logout,
     getProfile,
-    updateUser,
+    updateUser: (userData) => dispatch(updateAuthUser(userData)),
   };
 };
+

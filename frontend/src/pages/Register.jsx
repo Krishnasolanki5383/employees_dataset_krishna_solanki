@@ -1,5 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { useFormik } from 'formik';
+import * as Yup from 'yup';
+import { Helmet } from 'react-helmet-async';
+import { toast } from 'react-toastify';
 import { useAuth } from '../hooks/useAuth';
 import Input from '../components/ui/Input';
 import Button from '../components/ui/Button';
@@ -8,85 +12,72 @@ import { FiEye, FiEyeOff } from 'react-icons/fi';
 const Register = () => {
   const { register } = useAuth();
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({ name: '', email: '', password: '', confirmPassword: '' });
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState([]);
-  const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-    setErrors([]);
-  };
+  // Form validation schema with Yup
+  const validationSchema = Yup.object({
+    name: Yup.string()
+      .trim()
+      .required('Name is required'),
+    email: Yup.string()
+      .email('Please enter a valid email address')
+      .required('Email is required'),
+    password: Yup.string()
+      .min(8, 'Password must be at least 8 characters')
+      .matches(/[A-Z]/, 'Password must contain at least one uppercase letter')
+      .matches(/[0-9]/, 'Password must contain at least one number')
+      .matches(/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/, 'Password must contain at least one special character')
+      .required('Password is required'),
+    confirmPassword: Yup.string()
+      .oneOf([Yup.ref('password'), null], 'Passwords must match')
+      .required('Confirm password is required'),
+  });
 
-  const validateForm = () => {
-    const localErrors = [];
-    if (!formData.name.trim()) {
-      localErrors.push('Name is required');
-    }
-
-    if (!formData.email) {
-      localErrors.push('Email is required');
-    } else if (!/^\S+@\S+\.\S+$/.test(formData.email)) {
-      localErrors.push('Please enter a valid email address');
-    }
-
-    const { password, confirmPassword } = formData;
-    if (!password) {
-      localErrors.push('Password is required');
-    } else {
-      if (password.length < 8) {
-        localErrors.push('Password must be at least 8 characters long');
+  // Form handling with Formik
+  const formik = useFormik({
+    initialValues: {
+      name: '',
+      email: '',
+      password: '',
+      confirmPassword: '',
+    },
+    validationSchema,
+    onSubmit: async (values, { setSubmitting }) => {
+      try {
+        setErrors([]);
+        await register(values.name, values.email, values.password);
+        setSuccess(true);
+        toast.success('Registration successful! Redirecting to login...');
+        setTimeout(() => {
+          navigate('/login');
+        }, 2000);
+      } catch (err) {
+        const serverErrors = err.response?.data?.errors;
+        if (Array.isArray(serverErrors) && serverErrors.length > 0) {
+          setErrors(serverErrors);
+        } else {
+          setErrors([err.response?.data?.message || 'Registration failed. Check password criteria.']);
+        }
+        toast.error(err.response?.data?.message || 'Registration failed.');
+      } finally {
+        setSubmitting(false);
       }
-      if (!/[A-Z]/.test(password)) {
-        localErrors.push('Password must contain at least one uppercase letter');
-      }
-      if (!/[0-9]/.test(password)) {
-        localErrors.push('Password must contain at least one number');
-      }
-      if (!/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(password)) {
-        localErrors.push('Password must contain at least one special character');
-      }
-    }
-
-    if (password !== confirmPassword) {
-      localErrors.push('Passwords do not match');
-    }
-
-    setErrors(localErrors);
-    return localErrors.length === 0;
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!validateForm()) return;
-
-    try {
-      setLoading(true);
-      setErrors([]);
-      await register(formData.name, formData.email, formData.password);
-      setSuccess(true);
-      setTimeout(() => {
-        navigate('/login');
-      }, 2000);
-    } catch (err) {
-      const serverErrors = err.response?.data?.errors;
-      if (Array.isArray(serverErrors) && serverErrors.length > 0) {
-        setErrors(serverErrors);
-      } else {
-        setErrors([err.response?.data?.message || 'Registration failed. Check password criteria.']);
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
+    },
+  });
 
   return (
-    <div className="min-h-screen bg-brand-bg flex flex-col justify-center items-center px-4">
-      <div className="w-full max-w-md bg-brand-card border border-gray-800 rounded-2xl shadow-2xl p-8 space-y-6">
+    <div className="min-h-screen bg-brand-bg flex flex-col justify-center items-center px-4 transition-colors">
+      <Helmet>
+        <title>Register | EMS Portal</title>
+        <meta name="description" content="Register a new admin or user account on the Employee Management System." />
+      </Helmet>
+
+      <div className="w-full max-w-md bg-brand-card border border-gray-800/10 rounded-2xl shadow-2xl p-8 space-y-6">
         <div className="text-center space-y-2">
           <span className="text-4xl">⚙️</span>
-          <h2 className="text-2xl font-bold tracking-tight text-white">Create Account</h2>
+          <h2 className="text-2xl font-bold tracking-tight text-brand-text">Create Account</h2>
           <p className="text-sm text-brand-textMuted">Register a new Administrator or User</p>
         </div>
 
@@ -106,12 +97,14 @@ const Register = () => {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={formik.handleSubmit} className="space-y-4">
           <Input
             label="Full Name"
             name="name"
-            value={formData.name}
-            onChange={handleChange}
+            value={formik.values.name}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            error={formik.touched.name && formik.errors.name}
             placeholder="John Doe"
             required
           />
@@ -120,8 +113,10 @@ const Register = () => {
             label="Email Address"
             type="email"
             name="email"
-            value={formData.email}
-            onChange={handleChange}
+            value={formik.values.email}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            error={formik.touched.email && formik.errors.email}
             placeholder="example@domain.com"
             required
           />
@@ -131,15 +126,17 @@ const Register = () => {
               label="Password"
               type={showPassword ? 'text' : 'password'}
               name="password"
-              value={formData.password}
-              onChange={handleChange}
+              value={formik.values.password}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              error={formik.touched.password && formik.errors.password}
               placeholder="Min 8 chars, 1 uppercase, 1 number, 1 symbol"
               required
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-[34px] text-gray-500 hover:text-white"
+              className="absolute right-3 top-[34px] text-brand-textMuted hover:text-brand-primary cursor-pointer"
             >
               {showPassword ? <FiEyeOff className="h-5 w-5" /> : <FiEye className="h-5 w-5" />}
             </button>
@@ -150,8 +147,10 @@ const Register = () => {
               label="Confirm Password"
               type={showPassword ? 'text' : 'password'}
               name="confirmPassword"
-              value={formData.confirmPassword}
-              onChange={handleChange}
+              value={formik.values.confirmPassword}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              error={formik.touched.confirmPassword && formik.errors.confirmPassword}
               placeholder="Re-enter password"
               required
             />
@@ -161,7 +160,7 @@ const Register = () => {
             <Button
               type="submit"
               variant="primary"
-              loading={loading}
+              loading={formik.isSubmitting}
               className="w-full py-2.5"
             >
               Sign Up
@@ -181,3 +180,4 @@ const Register = () => {
 };
 
 export default Register;
+

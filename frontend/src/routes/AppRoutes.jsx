@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Routes, Route, Navigate, Outlet } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import { useAuth } from '../hooks/useAuth';
 import Loader from '../components/common/Loader';
 import Navbar from '../components/common/Navbar';
@@ -58,6 +59,16 @@ const PublicLayout = () => {
 };
 
 const AppRoutes = () => {
+  const theme = useSelector((state) => state.ui.theme);
+
+  useEffect(() => {
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [theme]);
+
   return (
     <Routes>
       {/* Public Routes */}
@@ -81,3 +92,4 @@ const AppRoutes = () => {
 };
 
 export default AppRoutes;
+

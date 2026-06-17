@@ -1,12 +1,27 @@
-import React from 'react';
-import { useAnalyticsData } from '../hooks/useAnalytics';
+import React, { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { Helmet } from 'react-helmet-async';
+import { fetchAnalyticsData } from '../store/dataSlice';
 import Card from '../components/ui/Card';
 import Loader from '../components/common/Loader';
 import ErrorMessage from '../components/common/ErrorMessage';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, PieChart, Pie, Cell } from 'recharts';
 
 const Analytics = () => {
-  const { data: analytics, isLoading, error, refetch } = useAnalyticsData();
+  const dispatch = useDispatch();
+
+  const {
+    analyticsData: analytics,
+    loadingAnalytics,
+    errorAnalytics
+  } = useSelector((state) => state.data);
+
+  useEffect(() => {
+    dispatch(fetchAnalyticsData());
+  }, [dispatch]);
+
+  const isLoading = loadingAnalytics || !analytics;
+  const error = errorAnalytics;
 
   if (isLoading) {
     return <Loader message="Compiling database analytics breakdowns..." />;
@@ -15,13 +30,11 @@ const Analytics = () => {
   if (error) {
     return (
       <ErrorMessage 
-        message={error.response?.data?.message || 'Failed to fetch analytics statistics.'} 
-        onRetry={refetch}
+        message={error} 
+        onRetry={() => dispatch(fetchAnalyticsData())}
       />
     );
   }
-
-  const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#8B5CF6', '#EC4899', '#374151'];
 
   // Skills Distribution
   const skillsData = analytics.skillsDistribution?.map(item => ({
@@ -43,9 +56,14 @@ const Analytics = () => {
 
   return (
     <div className="space-y-6">
+      <Helmet>
+        <title>Analytics & Reports | EMS Portal</title>
+        <meta name="description" content="View company analytics, skill frequencies, timezone divisions, and profile verification status statistics." />
+      </Helmet>
+
       {/* Page Header */}
       <div>
-        <h1 className="text-2xl font-bold text-white tracking-tight">System Analytics Breakdown</h1>
+        <h1 className="text-2xl font-bold text-brand-text tracking-tight">System Analytics Breakdown</h1>
         <p className="text-sm text-brand-textMuted mt-1">Deep-dive charts and organization distributions</p>
       </div>
 
@@ -56,14 +74,14 @@ const Analytics = () => {
             <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={skillsData} margin={{ top: 20, right: 10, left: -20, bottom: 5 }}>
-                  <XAxis dataKey="name" stroke="#9CA3AF" fontSize={11} tickLine={false} />
-                  <YAxis stroke="#9CA3AF" fontSize={11} tickLine={false} />
+                  <XAxis dataKey="name" stroke="var(--color-brand-textMuted)" fontSize={11} tickLine={false} />
+                  <YAxis stroke="var(--color-brand-textMuted)" fontSize={11} tickLine={false} />
                   <Tooltip 
-                    contentStyle={{ backgroundColor: '#1F2937', borderColor: '#374151' }}
-                    labelStyle={{ color: '#F9FAFB', fontWeight: 'bold' }}
-                    itemStyle={{ color: '#3B82F6' }}
+                    contentStyle={{ backgroundColor: 'var(--color-brand-card)', borderColor: 'var(--color-brand-textMuted)' }}
+                    labelStyle={{ color: 'var(--color-brand-text)', fontWeight: 'bold' }}
+                    itemStyle={{ color: 'var(--color-brand-primary)' }}
                   />
-                  <Bar dataKey="count" fill="#3B82F6" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="count" fill="var(--color-brand-primary)" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -95,8 +113,8 @@ const Analytics = () => {
                       ))}
                     </Pie>
                     <Tooltip
-                      contentStyle={{ backgroundColor: '#1F2937', borderColor: '#374151' }}
-                      itemStyle={{ color: '#F9FAFB' }}
+                      contentStyle={{ backgroundColor: 'var(--color-brand-card)', borderColor: 'var(--color-brand-textMuted)' }}
+                      itemStyle={{ color: 'var(--color-brand-text)' }}
                     />
                   </PieChart>
                 </ResponsiveContainer>
@@ -104,12 +122,12 @@ const Analytics = () => {
 
               <div className="w-full md:w-1/2 space-y-4">
                 {verificationData.map((item, idx) => (
-                  <div key={item.name} className="flex items-center justify-between p-3 bg-brand-bg rounded-lg border border-gray-800">
+                  <div key={item.name} className="flex items-center justify-between p-3 bg-brand-bg border border-gray-800/10 rounded-lg">
                     <div className="flex items-center gap-2">
                       <span className="h-3.5 w-3.5 rounded-full" style={{ backgroundColor: idx === 0 ? '#10B981' : '#F59E0B' }} />
-                      <span className="text-sm font-semibold text-white">{item.name}</span>
+                      <span className="text-sm font-semibold text-brand-text">{item.name}</span>
                     </div>
-                    <span className="text-xs text-brand-textMuted font-medium bg-gray-800 px-2 py-1 rounded">
+                    <span className="text-xs text-brand-textMuted font-medium bg-brand-card px-2 py-1 rounded">
                       {item.count} Profiles
                     </span>
                   </div>
@@ -130,11 +148,11 @@ const Analytics = () => {
           <div className="h-80">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart layout="vertical" data={timezoneData} margin={{ top: 20, right: 10, left: 10, bottom: 5 }}>
-                <XAxis type="number" stroke="#9CA3AF" fontSize={11} tickLine={false} />
-                <YAxis type="category" dataKey="name" stroke="#9CA3AF" fontSize={11} tickLine={false} />
+                <XAxis type="number" stroke="var(--color-brand-textMuted)" fontSize={11} tickLine={false} />
+                <YAxis type="category" dataKey="name" stroke="var(--color-brand-textMuted)" fontSize={11} tickLine={false} />
                 <Tooltip
-                  contentStyle={{ backgroundColor: '#1F2937', borderColor: '#374151' }}
-                  itemStyle={{ color: '#F9FAFB' }}
+                  contentStyle={{ backgroundColor: 'var(--color-brand-card)', borderColor: 'var(--color-brand-textMuted)' }}
+                  itemStyle={{ color: 'var(--color-brand-text)' }}
                 />
                 <Bar dataKey="count" fill="#8B5CF6" radius={[0, 4, 4, 0]} />
               </BarChart>
@@ -151,3 +169,4 @@ const Analytics = () => {
 };
 
 export default Analytics;
+

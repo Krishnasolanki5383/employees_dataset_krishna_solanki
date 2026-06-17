@@ -1,5 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { useFormik } from 'formik';
+import * as Yup from 'yup';
+import { Helmet } from 'react-helmet-async';
+import { toast } from 'react-toastify';
 import { useAuth } from '../hooks/useAuth';
 import Input from '../components/ui/Input';
 import Button from '../components/ui/Button';
@@ -8,61 +12,57 @@ import { FiEye, FiEyeOff } from 'react-icons/fi';
 const Login = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({ email: '', password: '' });
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState([]);
-  const [loading, setLoading] = useState(false);
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-    setErrors([]);
-  };
+  // Form validation schema with Yup
+  const validationSchema = Yup.object({
+    email: Yup.string()
+      .email('Please enter a valid email address')
+      .required('Email is required'),
+    password: Yup.string()
+      .min(6, 'Password must be at least 6 characters')
+      .required('Password is required'),
+  });
 
-  const validateForm = () => {
-    const localErrors = [];
-    if (!formData.email) {
-      localErrors.push('Email is required');
-    } else if (!/^\S+@\S+\.\S+$/.test(formData.email)) {
-      localErrors.push('Please enter a valid email address');
-    }
-
-    if (!formData.password) {
-      localErrors.push('Password is required');
-    } else if (formData.password.length < 6) {
-      localErrors.push('Password must be at least 6 characters long');
-    }
-
-    setErrors(localErrors);
-    return localErrors.length === 0;
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!validateForm()) return;
-
-    try {
-      setLoading(true);
-      setErrors([]);
-      await login(formData.email, formData.password);
-      navigate('/');
-    } catch (err) {
-      const serverErrors = err.response?.data?.errors;
-      if (Array.isArray(serverErrors) && serverErrors.length > 0) {
-        setErrors(serverErrors);
-      } else {
-        setErrors([err.response?.data?.message || 'Login failed. Invalid credentials.']);
+  // Form handling with Formik
+  const formik = useFormik({
+    initialValues: {
+      email: '',
+      password: '',
+    },
+    validationSchema,
+    onSubmit: async (values, { setSubmitting }) => {
+      try {
+        setErrors([]);
+        await login(values.email, values.password);
+        toast.success('Successfully logged in!');
+        navigate('/');
+      } catch (err) {
+        const serverErrors = err.response?.data?.errors;
+        if (Array.isArray(serverErrors) && serverErrors.length > 0) {
+          setErrors(serverErrors);
+        } else {
+          setErrors([err.response?.data?.message || 'Login failed. Invalid credentials.']);
+        }
+        toast.error(err.response?.data?.message || 'Login failed. Invalid credentials.');
+      } finally {
+        setSubmitting(false);
       }
-    } finally {
-      setLoading(false);
-    }
-  };
+    },
+  });
 
   return (
-    <div className="min-h-screen bg-brand-bg flex flex-col justify-center items-center px-4">
-      <div className="w-full max-w-md bg-brand-card border border-gray-800 rounded-2xl shadow-2xl p-8 space-y-6">
+    <div className="min-h-screen bg-brand-bg flex flex-col justify-center items-center px-4 transition-colors">
+      <Helmet>
+        <title>Login | EMS Portal</title>
+        <meta name="description" content="Sign in to your Employee Management System account to manage employee records, view analytics, and update settings." />
+      </Helmet>
+
+      <div className="w-full max-w-md bg-brand-card border border-gray-800/10 rounded-2xl shadow-2xl p-8 space-y-6">
         <div className="text-center space-y-2">
           <span className="text-4xl">⚙️</span>
-          <h2 className="text-2xl font-bold tracking-tight text-white">Welcome Back</h2>
+          <h2 className="text-2xl font-bold tracking-tight text-brand-text">Welcome Back</h2>
           <p className="text-sm text-brand-textMuted">Sign in to your Employee Portal account</p>
         </div>
 
@@ -76,13 +76,15 @@ const Login = () => {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={formik.handleSubmit} className="space-y-4">
           <Input
             label="Email Address"
             type="email"
             name="email"
-            value={formData.email}
-            onChange={handleChange}
+            value={formik.values.email}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            error={formik.touched.email && formik.errors.email}
             placeholder="example@domain.com"
             required
           />
@@ -92,15 +94,17 @@ const Login = () => {
               label="Password"
               type={showPassword ? 'text' : 'password'}
               name="password"
-              value={formData.password}
-              onChange={handleChange}
+              value={formik.values.password}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              error={formik.touched.password && formik.errors.password}
               placeholder="••••••••"
               required
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-[34px] text-gray-500 hover:text-white"
+              className="absolute right-3 top-[34px] text-brand-textMuted hover:text-brand-primary cursor-pointer"
             >
               {showPassword ? <FiEyeOff className="h-5 w-5" /> : <FiEye className="h-5 w-5" />}
             </button>
@@ -110,7 +114,7 @@ const Login = () => {
             <Button
               type="submit"
               variant="primary"
-              loading={loading}
+              loading={formik.isSubmitting}
               className="w-full py-2.5"
             >
               Sign In
@@ -130,3 +134,4 @@ const Login = () => {
 };
 
 export default Login;
+

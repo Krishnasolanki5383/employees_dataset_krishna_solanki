@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useEmployeeDetail } from '../hooks/useEmployees';
-import { useEmployeePersonalStats } from '../hooks/useAnalytics';
+import { useDispatch, useSelector } from 'react-redux';
+import { Helmet } from 'react-helmet-async';
+import { fetchEmployeeById, fetchEmployeePersonalStats, clearSelectedEmployee } from '../store/dataSlice';
 import Card from '../components/ui/Card';
 import Badge from '../components/ui/Badge';
 import Button from '../components/ui/Button';
@@ -13,30 +14,51 @@ import { ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadius
 const EmployeeDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
-  const { data: employeeData, isLoading: detailLoading, error: detailError } = useEmployeeDetail(id);
-  const { data: statsData, isLoading: statsLoading, error: statsError } = useEmployeePersonalStats(id);
+  const {
+    selectedEmployee: emp,
+    selectedEmployeeStats: statsData,
+    loadingDetail,
+    loadingPersonalStats,
+    errorDetail,
+    errorPersonalStats,
+  } = useSelector((state) => state.data);
 
-  if (detailLoading || statsLoading) {
+  useEffect(() => {
+    if (id) {
+      dispatch(fetchEmployeeById(id));
+      dispatch(fetchEmployeePersonalStats(id));
+    }
+    return () => {
+      dispatch(clearSelectedEmployee());
+    };
+  }, [id, dispatch]);
+
+  if (loadingDetail || loadingPersonalStats) {
     return <Loader message="Fetching employee profile..." />;
   }
 
-  if (detailError || statsError) {
+  if (errorDetail || errorPersonalStats) {
     return (
       <ErrorMessage 
-        message={detailError?.response?.data?.message || statsError?.response?.data?.message || 'Failed to fetch employee details.'} 
-        onRetry={() => navigate('/employees')}
+        message={errorDetail || errorPersonalStats || 'Failed to fetch employee details.'} 
+        onRetry={() => {
+          if (id) {
+            dispatch(fetchEmployeeById(id));
+            dispatch(fetchEmployeePersonalStats(id));
+          }
+        }}
       />
     );
   }
 
-  const emp = employeeData?.data;
-  const stats = statsData?.stats;
-  const performance = statsData?.performance;
-
   if (!emp) {
     return <ErrorMessage message="Employee profile not found." onRetry={() => navigate('/employees')} />;
   }
+
+  const stats = statsData?.stats;
+  const performance = statsData?.performance;
 
   // Format charts for employee performance radar
   const performanceData = [
@@ -55,13 +77,18 @@ const EmployeeDetail = () => {
 
   return (
     <div className="space-y-6">
+      <Helmet>
+        <title>{emp.name} - Profile | EMS Portal</title>
+        <meta name="description" content={`View comprehensive profile of ${emp.name}, including active projects, primary skills, task metrics, and peer evaluations.`} />
+      </Helmet>
+
       {/* Back Button & Title */}
       <div className="flex items-center gap-4">
         <Button variant="secondary" onClick={() => navigate('/employees')} className="p-2">
           <FiArrowLeft className="h-5 w-5" />
         </Button>
         <div>
-          <h1 className="text-2xl font-bold text-white tracking-tight">Employee Profile</h1>
+          <h1 className="text-2xl font-bold text-brand-text tracking-tight">Employee Profile</h1>
           <p className="text-sm text-brand-textMuted mt-0.5">Comprehensive view of skills, assignments, and ratings</p>
         </div>
       </div>
@@ -70,11 +97,11 @@ const EmployeeDetail = () => {
         {/* Profile Details Card */}
         <Card className="lg:col-span-1 flex flex-col justify-between">
           <div className="space-y-6">
-            <div className="text-center pb-6 border-b border-gray-800">
+            <div className="text-center pb-6 border-b border-gray-800/20">
               <div className="h-20 w-20 rounded-full bg-brand-primary/10 border-2 border-brand-primary flex items-center justify-center text-brand-primary text-3xl font-bold mx-auto mb-4">
                 {emp.name?.charAt(0)}
               </div>
-              <h2 className="text-xl font-bold text-white flex justify-center items-center gap-2">
+              <h2 className="text-xl font-bold text-brand-text flex justify-center items-center gap-2">
                 {emp.name}
                 {emp.isVerified && <span className="text-xs text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20 font-medium">Verified</span>}
               </h2>
@@ -176,10 +203,10 @@ const EmployeeDetail = () => {
               <div className="h-64">
                 <ResponsiveContainer width="100%" height="100%">
                   <RadarChart cx="50%" cy="50%" outerRadius="75%" data={performanceData}>
-                    <PolarGrid stroke="#374151" />
-                    <PolarAngleAxis dataKey="subject" stroke="#9CA3AF" fontSize={10} />
-                    <PolarRadiusAxis angle={30} domain={[0, 100]} stroke="#4B5563" fontSize={9} />
-                    <Radar name={emp.name} dataKey="value" stroke="#3B82F6" fill="#3B82F6" fillOpacity={0.35} />
+                    <PolarGrid stroke="var(--color-brand-textMuted)" opacity={0.2} />
+                    <PolarAngleAxis dataKey="subject" stroke="var(--color-brand-textMuted)" fontSize={10} />
+                    <PolarRadiusAxis angle={30} domain={[0, 100]} stroke="var(--color-brand-textMuted)" opacity={0.2} fontSize={9} />
+                    <Radar name={emp.name} dataKey="value" stroke="var(--color-brand-primary)" fill="var(--color-brand-primary)" fillOpacity={0.35} />
                   </RadarChart>
                 </ResponsiveContainer>
               </div>
@@ -189,13 +216,13 @@ const EmployeeDetail = () => {
               <div className="h-64">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={taskStatsData} margin={{ top: 20, right: 10, left: -20, bottom: 5 }}>
-                    <XAxis dataKey="name" stroke="#9CA3AF" fontSize={11} tickLine={false} />
-                    <YAxis stroke="#9CA3AF" fontSize={11} tickLine={false} />
+                    <XAxis dataKey="name" stroke="var(--color-brand-textMuted)" fontSize={11} tickLine={false} />
+                    <YAxis stroke="var(--color-brand-textMuted)" fontSize={11} tickLine={false} />
                     <Tooltip
-                      contentStyle={{ backgroundColor: '#1F2937', borderColor: '#374151' }}
-                      itemStyle={{ color: '#3B82F6' }}
+                      contentStyle={{ backgroundColor: 'var(--color-brand-card)', borderColor: 'var(--color-brand-textMuted)' }}
+                      itemStyle={{ color: 'var(--color-brand-primary)' }}
                     />
-                    <Bar dataKey="count" fill="#10B981" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="count" fill="var(--color-brand-accent)" radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
@@ -208,3 +235,4 @@ const EmployeeDetail = () => {
 };
 
 export default EmployeeDetail;
+
